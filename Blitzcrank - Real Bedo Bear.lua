@@ -1,6 +1,6 @@
-local version = "1.04"
+local version = "1.05"
 
-if myHero.charName ~= "Blitzcrank" then return end
+if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
 
  _G.UseUpdater = true
 
