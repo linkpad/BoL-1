@@ -1,4 +1,4 @@
-local version = "1.03"
+local version = "1.04"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -68,7 +68,7 @@ end
 ------------------------------------------------------
 
 function OnLoad()
-	print("<b><font color=\"#6699FF\">Blitzcrank : The 'Real' Bedo Bear </font></b><font color=\"#FFFFFF\">Good luck and have fun!</font>")
+	print("<b><font color=\"#6699FF\">Blitzcrank : The 'Real' Bedo Bear </font></b><font color=\"#FFFFFF\">Have a Good Game !</font>")
 	Variables()
 	Menu()
 end
@@ -158,7 +158,7 @@ function Checks()
 end
 
 function Menu()
-	Settings = scriptConfig("Blitzcrank : The 'Real' Bedo Bear"..version.."", "AMBER")
+	Settings = scriptConfig("Blitzcrank : The 'Real' Bedo Bear | "..version.."", "AMBER")
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
@@ -188,8 +188,8 @@ end
 
 function Variables()
 	SkillQ = { name = "Rocket Grab", range = 925, delay = 0.25, speed = math.huge, width = 80, ready = false }
-	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = 80, ready = false }
-	SkillE = { name = "Power Fist", range = 200, delay = nil, speed = nil, width = nil, ready = false }
+	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = nil, ready = false }
+	SkillE = { name = "Power Fist", range = 250, delay = nil, speed = nil, width = nil, ready = false }
 	SkillR = { name = "Static Field", range = 600, delay = 0.5, speed = math.huge, angle = 80, ready = false }
 	
 	VP = VPrediction()
