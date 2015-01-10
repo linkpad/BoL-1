@@ -1,4 +1,4 @@
-local version = "1.06"
+local version = "1.07"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -140,7 +140,11 @@ function CastR(unit)
 end
 
 ------------------------------------------------------
---			 Checks, menu & stuff				
+------------------------------------------------------
+------------------------------------------------------
+--			MENU & CHECKS
+------------------------------------------------------
+------------------------------------------------------
 ------------------------------------------------------
 
 function Checks()
@@ -201,7 +205,6 @@ function Variables()
 	_G.DrawCircle = DrawCircle2
 end
 
--- Trees
 function GetCustomTarget()
  	TargetSelector:update() 	
 	if _G.MMA_Target and _G.MMA_Target.type == myHero.type then return _G.MMA_Target end
