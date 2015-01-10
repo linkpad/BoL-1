@@ -1,4 +1,4 @@
-local version = "1.11"
+local version = "1.20"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -79,6 +79,8 @@ function OnTick()
 	if ComboKey then
 		Combo(Target)
 	end
+	
+	KillSteall()
 	Checks()
 end
 
@@ -105,26 +107,46 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 
+function KillSteall()
+	for _, unit in pairs(GetEnemyHeroes()) do
+		local health = unit.health
+		local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
+			if health < dmgR and Settings.killsteal.useR and ValidTarget(unit) then
+				CastR(unit)
+			end
+	 end
+end
+
 function Combo(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+	
 		CastQ(unit)
 		CastE(unit)
-		CastR(unit)
+		
+		if Settings.combo.useR then 
+			CastR(unit)
+		end
+		if Settings.combo.RifKilable then
+				local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
+				if unit.health < dmgR then
+					CastR(unit)
+				end
+		end
 	end
 end
 
 function CastE(unit)
 	if GetDistance(unit) <= SkillE.range and SkillE.ready then
-			CastSpell(_E)
+			Packet("S_CAST", {spellId = _E}):send()
+			myHero:Attack(unit)
 	end	
 end
 
 function CastQ(unit)
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready then
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)
-				
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
 		if HitChance >= 2 then
-			CastSpell(_Q, CastPosition.x, CastPosition.z)
+			Packet("S_CAST", {spellId = _Q, fromX = CastPosition.x, fromY = CastPosition.z, toX = CastPosition.x, toY = CastPosition.z}):send()
 		end
 	end
 end
@@ -132,11 +154,9 @@ end
 
 
 function CastR(unit)
-	if Settings.combo.useR then 
-		if GetDistance(unit) <= SkillR.range and SkillR.ready then
-			CastSpell(_R)
-		end	
-	end
+	if GetDistance(unit) <= SkillR.range and SkillR.ready then
+		Packet("S_CAST", {spellId = _R}):send()
+	end	
 end
 
 ------------------------------------------------------
@@ -166,10 +186,17 @@ function Menu()
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-		Settings.combo:addParam("useR", "Use "..SkillR.name.." (R) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
+		
 		Settings.combo:permaShow("comboKey")
 		Settings.combo:permaShow("useR")
-			
+		Settings.combo:permaShow("RifKilable")
+		Settings.killsteal:permaShow("useR")
+	
+	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
+	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, false)
+	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
 		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
 		Settings.drawing:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
