@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.2"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
