@@ -33,7 +33,7 @@ if DOWNLOADING_LIBS then return end
 
 local UPDATE_NAME = "Blitzcrank : Ass-Grabber"
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20:%20Ass-Grabber" .. "?rand=" .. math.random(1, 10000)
+local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20:%20Ass-Grabber.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "http://"..UPDATE_HOST..UPDATE_PATH
 
