@@ -1,4 +1,5 @@
-local version = "1.0"
+local version = "1.1"
+---- TEST
 
 if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
 
