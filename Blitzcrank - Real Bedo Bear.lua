@@ -1,4 +1,4 @@
-local version = "1.02"
+local version = "1.03"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -15,7 +15,7 @@ function AfterDownload()
 	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
 	if DOWNLOAD_COUNT == 0 then
 		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#6699FF\">Blitzcrank 'Real' Bedo Bear :</font></b> <font color=\"#FFFFFF\">Required libraries downloaded successfully, please reload (double F9).</font>")
+		print("<b><font color=\"#6699FF\">Blitzcrank : The 'Real' Bedo Bear :</font></b> <font color=\"#FFFFFF\">Required libraries downloaded successfully, please reload (double F9).</font>")
 	end
 end
 
@@ -31,7 +31,7 @@ end
 
 if DOWNLOADING_LIBS then return end
 
-local UPDATE_NAME = "Blitzcrank 'Real' Bedo Bear"
+local UPDATE_NAME = "Blitzcrank : The 'Real' Bedo Bear "
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20-%20Real%20Bedo%20Bear.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -68,7 +68,7 @@ end
 ------------------------------------------------------
 
 function OnLoad()
-	print("<b><font color=\"#6699FF\">Blitzcrank - The REAL Bedo Bear</font></b><font color=\"#FFFFFF\">Good luck and have fun!</font>")
+	print("<b><font color=\"#6699FF\">Blitzcrank : The 'Real' Bedo Bear </font></b><font color=\"#FFFFFF\">Good luck and have fun!</font>")
 	Variables()
 	Menu()
 end
@@ -158,7 +158,7 @@ function Checks()
 end
 
 function Menu()
-	Settings = scriptConfig("Blitzcrank Awsome Hook "..version.."", "AMBER")
+	Settings = scriptConfig("Blitzcrank : The 'Real' Bedo Bear"..version.."", "AMBER")
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
