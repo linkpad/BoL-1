@@ -2,10 +2,10 @@ local version = "1.02"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
-_G.UseUpdater = true
+ _G.UseUpdater = true
 
 local REQUIRED_LIBS = {
-	["SOW"] = "https://raw.githubusercontent.com/Hellsing/BoL/master/common/SOW.lua",
+	["SxOrbwalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["VPrediction"] = "https://raw.githubusercontent.com/Hellsing/BoL/master/common/VPrediction.lua",
 }
 
@@ -15,7 +15,7 @@ function AfterDownload()
 	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
 	if DOWNLOAD_COUNT == 0 then
 		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#6699FF\">Blitzcrank 'Real' Bedo Bear</font></b> <font color=\"#FFFFFF\">Required libraries downloaded successfully, please reload (double F9).</font>")
+		print("<b><font color=\"#6699FF\">Blitzcrank 'Real' Bedo Bear :</font></b> <font color=\"#FFFFFF\">Required libraries downloaded successfully, please reload (double F9).</font>")
 	end
 end
 
@@ -36,6 +36,7 @@ local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20-%20Real%20Bedo%20Bear.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "http://"..UPDATE_HOST..UPDATE_PATH
+
 
 function AutoupdaterMsg(msg) print("<b><font color=\"#6699FF\">"..UPDATE_NAME..":</font></b> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if _G.UseUpdater then
