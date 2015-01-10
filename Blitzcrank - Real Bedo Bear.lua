@@ -164,6 +164,7 @@ function Menu()
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		Settings.combo:addParam("useR", "Use "..SkillR.name.." (R) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.combo:permaShow("comboKey")
+		Settings.combo:permaShow("useR")
 			
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
 		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
