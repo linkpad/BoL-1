@@ -189,13 +189,14 @@ function Menu()
 		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
 		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
 		
+	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
+	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, false)
+		
 		Settings.combo:permaShow("comboKey")
 		Settings.combo:permaShow("useR")
 		Settings.combo:permaShow("RifKilable")
 		Settings.killsteal:permaShow("useR")
 	
-	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
-	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, false)
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
 		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
