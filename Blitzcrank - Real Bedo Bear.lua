@@ -1,6 +1,6 @@
-local version = "1.05"
+local version = "1.06"
 
-if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
+if myHero.charName ~= "Blitzcrank" then return end
 
  _G.UseUpdater = true
 
@@ -191,7 +191,7 @@ function Variables()
 	SkillQ = { name = "Rocket Grab", range = 925, delay = 0.25, speed = math.huge, width = 80, ready = false }
 	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = nil, ready = false }
 	SkillE = { name = "Power Fist", range = 250, delay = nil, speed = nil, width = nil, ready = false }
-	SkillR = { name = "Static Field", range = 600, delay = 0.5, speed = math.huge, angle = 80, ready = false }
+	SkillR = { name = "Static Field", range = 590, delay = 0.5, speed = math.huge, angle = 80, ready = false }
 	
 	VP = VPrediction()
 
