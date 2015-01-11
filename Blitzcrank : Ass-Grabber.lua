@@ -1,4 +1,4 @@
-local version = "1.29"
+local version = "1.30"
 
 if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
 
@@ -76,7 +76,7 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	ts = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
+	TargetSelector = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
 end
@@ -84,8 +84,8 @@ end
 function OnTick()
 	ComboKey = Settings.combo.comboKey
 	
-	ts:update()
-	Target = ts.target
+	TargetSelector:update()
+	Target = GetCustomTarget()
 	SxOrb:ForceTarget(Target)
 
 	 test = tostring(math.ceil(ManashieldStrength()))
@@ -121,7 +121,7 @@ function OnDraw()
 
 	if Settings.drawstats.stats then
 		if Settings.drawstats.pourcentage then
-			DrawText("Pourcentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
+			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
 		end
 		if Settings.drawstats.grabdone then
 			DrawText("Grab Done : "..tostring(nbgrabwin),18, 400, 940, 0xff00ff00)
@@ -165,6 +165,41 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 ------------------------------------------------------
+
+function GetCustomTarget()
+	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1500) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
+		return SelectedTarget
+	end
+	TargetSelector:update()	
+	if TargetSelector.target and not TargetSelector.target.dead and TargetSelector.target.type == myHero.type then
+		return TargetSelector.target
+	else
+		return nil
+	end
+end
+
+function OnWndMsg(Msg, Key)	
+	if Msg == WM_LBUTTONDOWN then
+		local minD = 0
+		local Target = nil
+		for i, enemy in ipairs(GetEnemyHeroes()) do
+			if ValidTarget(enemy) then
+				if GetDistance(enemy, mousePos) <= minD or Target == nil then
+					minD = GetDistance(enemy, mousePos)
+					Target = enemy
+				end
+			end
+		end
+
+		if Target and minD < 115 then
+			if SelectedTarget and Target.charName == SelectedTarget.charName then
+				SelectedTarget = nil
+			else
+				SelectedTarget = Target
+			end
+		end
+	end
+end
 
 function ManashieldStrength()
  local ShieldStrength = myHero.mana*0.5
@@ -332,7 +367,7 @@ function Menu()
 		Settings.extra:permaShow("baseW")
 	
 	TargetSelector.name = "Blitzcrank"
-	Settings:addTS(ts)
+	Settings:addTS(TargetSelector)
 	
 end
 
