@@ -1,4 +1,4 @@
-local version = "1.25"
+local version = "1.26"
 
 if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
 
@@ -7,6 +7,7 @@ local nbgrabtotal = 0
 local missedgrab = (nbgrabtotal-nbgrabwin)
 local pourcentage =0
 local ts
+
  _G.UseUpdater = true
 
 local REQUIRED_LIBS = {
@@ -84,6 +85,13 @@ function OnTick()
 	ts:update()
 	local Target = ts.target
 	
+	if Settings.extra.baseW then 
+		local pos = Vector(1316,1300) 
+		if GetDistance(pos) < 800 then 
+			CastW() 
+		end
+	end
+	
 	
 	SxOrb:ForceTarget(Target)
 	
@@ -113,8 +121,12 @@ function OnDraw()
 
 	if not myHero.dead and not Settings.drawing.mDraw then	
 		if ValidTarget(ts.target) then
-				DrawText3D("Current Target:" .. ts.target.charName,ts.target.x-100, ts.target.y-50, ts.target.z, 20)
+			if Settings.drawing.text then 
+				DrawText3D("Current Target:" .. ts.target.charName,ts.target.x-100, ts.target.y-50, ts.target.z, 20, 0xFFFFFF00)
+			end
+			if Settings.drawing.targetcircle then 
 				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+			end
 		end
 	
 	
@@ -138,6 +150,7 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 ------------------------------------------------------
+
 
 function OnProcessSpell(enemy, spell)
 	
@@ -233,8 +246,9 @@ function Checks()
 	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
 	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
 	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
-	
+
 	 _G.DrawCircle = _G.oldDrawCircle 
+	 
 end
 
 function Menu()
@@ -251,6 +265,8 @@ function Menu()
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
 	Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
+	Settings.extra:addParam("baseW", "Auto use (W) when leave base", SCRIPT_PARAM_ONOFF, true)
+	
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
 		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
@@ -260,6 +276,9 @@ function Menu()
 		Settings.drawing:addParam("qColor", "Draw "..SkillQ.name.." (Q) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
+		Settings.drawing:addParam("text", "Draw Current Target", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("targetcircle", "Draw Circle On Target", SCRIPT_PARAM_ONOFF, true)
+		
 		
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
 		Settings.drawstats:addParam("stats", "Draw Stats", SCRIPT_PARAM_ONOFF, true)
@@ -275,6 +294,9 @@ function Menu()
 		Settings.combo:permaShow("RifKilable")
 		Settings.killsteal:permaShow("useR")
 		Settings.drawstats:permaShow("stats")
+		Settings.extra:permaShow("teleportW")
+		Settings.extra:permaShow("baseW")
+		
 	
 	TargetSelector.name = "Blitzcrank"
 	Settings:addTS(ts)
