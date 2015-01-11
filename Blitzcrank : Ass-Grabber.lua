@@ -1,7 +1,12 @@
-local version = "1.21"
+local version = "1.22"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
+local nbgrabwin = 0
+local nbgrabtotal = 0
+local missedgrab = (nbgrabtotal-nbgrabwin)
+local pourcentage =0
+local ts
  _G.UseUpdater = true
 
 local REQUIRED_LIBS = {
@@ -47,7 +52,7 @@ if _G.UseUpdater then
 		if ServerVersion then
 			ServerVersion = tonumber(ServerVersion)
 			if tonumber(version) < ServerVersion then
-				AutoupdaterMsg("New version available  "..ServerVersion)
+				AutoupdaterMsg("New version available "..ServerVersion)
 				AutoupdaterMsg("Updating, please don't press F9")
 				DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end)	 
 			else
@@ -69,6 +74,7 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">Blitzcrank : Ass-Grabber: </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
+	ts = TargetSelector(TARGET_LOW_HP, 1300, DAMAGE_MAGICAL, true)
 	Variables()
 	Menu()
 end
@@ -76,16 +82,35 @@ end
 function OnTick()
 	ComboKey = Settings.combo.comboKey
 	
-	if ComboKey then
-		Combo(Target)
-	end
+	ts:update()
+	local Target = ts.target
+	SxOrb:ForceTarget(Target)
+	
+		if Target ~= nil then 
+			if ComboKey then
+				Combo(Target)
+			end
+		end
 	
 	KillSteall()
 	Checks()
 end
 
 function OnDraw()
+		
+
 	if not myHero.dead and not Settings.drawing.mDraw then
+		DrawText("Pourcentage Grab done: " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 10, 200, 0xFFFFFF00)
+		DrawText("Grab Done:"..tostring(nbgrabwin),18, 10, 220, 0xFFFFFF00)
+		
+		DrawText("Grab Miss:"..tostring(missedgrab),18, 10, 240, 0xFFFFFF00)
+		
+		if Target ~= nil then
+			local pos = WorldToScreen(D3DXVECTOR3(Target.x-100, Target.y-50, Target.z))
+			DrawText("Current Target:" .. Target.charName, 20, pos.x , pos.y, 0xFFFFFF00)
+		end
+	
+	
 		if SkillQ.ready and Settings.drawing.qDraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 		end
@@ -106,6 +131,24 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 ------------------------------------------------------
+
+function OnProcessSpell(unit, spell)
+
+    if spell.name == "RocketGrab" then
+		nbgrabtotal=nbgrabtotal+1
+		missedgrab = (nbgrabtotal-nbgrabwin)
+		pourcentage =((nbgrabwin*100)/nbgrabtotal)
+    end
+end
+
+function OnGainBuff(unit,buff) 
+
+	if unit.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" then 
+		nbgrabwin = nbgrabwin +1 
+		missedgrab = (nbgrabtotal-nbgrabwin)
+		pourcentage =((nbgrabwin*100)/nbgrabtotal)
+	end		
+end
 
 function KillSteall()
 	for _, unit in pairs(GetEnemyHeroes()) do
@@ -145,6 +188,7 @@ end
 function CastQ(unit)
 	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready then
 		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
+		
 		if HitChance >= 2 then
 			Packet("S_CAST", {spellId = _Q, fromX = CastPosition.x, fromY = CastPosition.z, toX = CastPosition.x, toY = CastPosition.z}):send()
 		end
@@ -173,12 +217,7 @@ function Checks()
 	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
 	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
 	
-	TargetSelector:update()
-	Target = GetCustomTarget()
-	SxOrb:ForceTarget(Target)
-	
-	--if VIP_USER and Settings.misc.skinList then ChooseSkin() end
-	if Settings.drawing.lfc.lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
+	 _G.DrawCircle = _G.oldDrawCircle 
 end
 
 function Menu()
@@ -207,10 +246,6 @@ function Menu()
 		Settings.drawing:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		
-	Settings.drawing:addSubMenu("Lag Free Circles", "lfc")	
-		Settings.drawing.lfc:addParam("lfc", "Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
-		Settings.drawing.lfc:addParam("CL", "Quality", 4, 75, 75, 2000, 0)
-		Settings.drawing.lfc:addParam("Width", "Width", 4, 1, 1, 10, 0)
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
 		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
@@ -226,19 +261,11 @@ function Variables()
 	SkillR = { name = "Static Field", range = 590, delay = 0.5, speed = math.huge, angle = 80, ready = false }
 	
 	VP = VPrediction()
-
-	lastSkin = 0
 	
 	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 	_G.DrawCircle = DrawCircle2
 end
 
-function GetCustomTarget()
- 	TargetSelector:update() 	
-	if _G.MMA_Target and _G.MMA_Target.type == myHero.type then return _G.MMA_Target end
-	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then return _G.AutoCarry.Attack_Crosshair.target end
-	return TargetSelector.target
-end
 
 function DrawCircle2(x, y, z, radius, color)
   local vPos1 = Vector(x, y, z)
