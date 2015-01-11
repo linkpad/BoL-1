@@ -1,4 +1,4 @@
-local version = "1.26"
+local version = "1.27"
 
 if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
 
@@ -84,10 +84,18 @@ function OnTick()
 	ComboKey = Settings.combo.comboKey
 	ts:update()
 	local Target = ts.target
+
 	
 	if Settings.extra.baseW then 
 		local pos = Vector(1316,1300) 
 		if GetDistance(pos) < 800 then 
+			CastW() 
+		end
+	end
+	
+	if Settings.extra.baseW then 
+		local pos2 = Vector(13500,13600) 
+		if GetDistance(pos2) < 800 then 
 			CastW() 
 		end
 	end
