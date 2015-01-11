@@ -1,4 +1,4 @@
-local version = "1.22"
+local version = "1.23"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -81,9 +81,13 @@ end
 
 function OnTick()
 	ComboKey = Settings.combo.comboKey
-	
 	ts:update()
-	local Target = ts.target
+	
+	local Target = GetTarget()
+	if Target == nil then
+		Target = ts.target
+	end
+	
 	SxOrb:ForceTarget(Target)
 	
 		if Target ~= nil then 
@@ -97,14 +101,14 @@ function OnTick()
 end
 
 function OnDraw()
-		
 
-	if not myHero.dead and not Settings.drawing.mDraw then
+	if not myHero.dead and Settings.drawing.stats then
 		DrawText("Pourcentage Grab done: " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 10, 200, 0xFFFFFF00)
 		DrawText("Grab Done:"..tostring(nbgrabwin),18, 10, 220, 0xFFFFFF00)
-		
 		DrawText("Grab Miss:"..tostring(missedgrab),18, 10, 240, 0xFFFFFF00)
-		
+	end
+
+	if not myHero.dead and not Settings.drawing.mDraw then	
 		if Target ~= nil then
 			local pos = WorldToScreen(D3DXVECTOR3(Target.x-100, Target.y-50, Target.z))
 			DrawText("Current Target:" .. Target.charName, 20, pos.x , pos.y, 0xFFFFFF00)
@@ -238,7 +242,8 @@ function Menu()
 	
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
-		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
+		Settings.drawing:addParam("mDraw", "Disable All Range Draws & Stats", SCRIPT_PARAM_ONOFF, false)
+		Settings.drawing:addParam("stats", "Draw Stats", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("myColor", "Draw My Range Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("qDraw", "Draw "..SkillQ.name.." (Q) Range", SCRIPT_PARAM_ONOFF, true)
