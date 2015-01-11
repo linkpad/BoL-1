@@ -7,6 +7,7 @@ local nbgrabtotal = 0
 local missedgrab = (nbgrabtotal-nbgrabwin)
 local pourcentage =0
 local ts
+local Target
 
  _G.UseUpdater = true
 
@@ -82,8 +83,10 @@ end
 
 function OnTick()
 	ComboKey = Settings.combo.comboKey
+	
 	ts:update()
-	local Target = ts.target
+	Target = ts.target
+	SxOrb:ForceTarget(Target)
 
 	
 	if Settings.extra.baseW then 
@@ -128,12 +131,12 @@ function OnDraw()
 	end
 
 	if not myHero.dead and not Settings.drawing.mDraw then	
-		if ValidTarget(ts.target) then
+		if ValidTarget(Target) then 
 			if Settings.drawing.text then 
-				DrawText3D("Current Target:" .. ts.target.charName,ts.target.x-100, ts.target.y-50, ts.target.z, 20, 0xFFFFFF00)
+				DrawText3D("Current Target:" .. Target.charName,Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFF00)
 			end
 			if Settings.drawing.targetcircle then 
-				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+				DrawCircle(Target.x, Target.y, Target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 			end
 		end
 	
