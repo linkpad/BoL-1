@@ -1,4 +1,4 @@
-local version = "1.24"
+local version = "1.23"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -74,7 +74,7 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	ts = TargetSelector(TARGET_LOW_HP, 1250, DAMAGE_MAGICAL, true)
+	ts = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, true)
 	Variables()
 	Menu()
 end
