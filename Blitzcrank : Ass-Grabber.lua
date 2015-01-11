@@ -1,4 +1,4 @@
-local version = "1.27"
+local version = "1.28"
 
 if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
 
@@ -76,7 +76,7 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	ts = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, true)
+	ts = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
 end
@@ -88,6 +88,7 @@ function OnTick()
 	Target = ts.target
 	SxOrb:ForceTarget(Target)
 
+	 test = tostring(math.ceil(ManashieldStrength()))
 	
 	if Settings.extra.baseW then 
 		local pos = Vector(1316,1300) 
@@ -120,20 +121,23 @@ function OnDraw()
 
 	if Settings.drawstats.stats then
 		if Settings.drawstats.pourcentage then
-			DrawText("Pourcentage Grab done: " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 10, 200, 0xFFFFFF00)
+			DrawText("Pourcentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
 		end
 		if Settings.drawstats.grabdone then
-			DrawText("Grab Done:"..tostring(nbgrabwin),18, 10, 220, 0xFFFFFF00)
+			DrawText("Grab Done : "..tostring(nbgrabwin),18, 400, 940, 0xff00ff00)
 		end
 		if Settings.drawstats.grabfail then
-			DrawText("Grab Miss:"..tostring(missedgrab),18, 10, 240, 0xFFFFFF00)
+			DrawText("Grab Miss : "..tostring(missedgrab),18, 400, 960, 0xFFFF0000)
+		end
+		if Settings.drawstats.mana and test ~= nil then
+			DrawText("Passive's Shield : ".. tostring(math.ceil(test)) .. "HP" ,18, 400, 980, 0xffffff00)
 		end
 	end
 
 	if not myHero.dead and not Settings.drawing.mDraw then	
 		if ValidTarget(Target) then 
 			if Settings.drawing.text then 
-				DrawText3D("Current Target:" .. Target.charName,Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFF00)
+				DrawText3D("Current Target",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFF00)
 			end
 			if Settings.drawing.targetcircle then 
 				DrawCircle(Target.x, Target.y, Target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
@@ -162,6 +166,10 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 
+function ManashieldStrength()
+ local ShieldStrength = myHero.mana*0.5
+ return ShieldStrength
+end
 
 function OnProcessSpell(enemy, spell)
 	
@@ -176,7 +184,17 @@ function OnProcessSpell(enemy, spell)
     end
 end
 
-function OnGainBuff(enemy,buff) 
+
+function OnGainBuff(enemy,buff)
+
+	if buff.name=="powerfistslow" and buff and buff.valid and not enemy.isMe then
+		if Settings.combo.useR then 
+			if 	Settings.combo.useRafterE then
+				CastR(enemy)
+			end
+		end
+	
+	end
 
 	if enemy.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" and not enemy.isMe then 
 		nbgrabwin = nbgrabwin +1 
@@ -204,7 +222,9 @@ function Combo(enemy)
 		end
 		
 		if Settings.combo.useR then 
-			CastR(enemy)
+			if not Settings.combo.useRafterE then
+				CastR(enemy)
+			end
 		end
 		if Settings.combo.RifKilable then
 				local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
@@ -268,8 +288,9 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
-		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useRafterE", "Use (R) After (E)", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, false)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
 	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
@@ -296,6 +317,7 @@ function Menu()
 		Settings.drawstats:addParam("pourcentage", "Show Pourcentage", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabdone", "Show Grab Done", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabfail", "Show Grab Fail", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("mana", "Show Passive's shield", SCRIPT_PARAM_ONOFF, true)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
 		SxOrb:LoadToMenu(Settings.Orbwalking)
