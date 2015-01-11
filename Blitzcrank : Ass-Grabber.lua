@@ -1,4 +1,4 @@
-local version = "1.23"
+local version = "1.24"
 
 if myHero.charName ~= "Blitzcrank" then return end
 
@@ -20,7 +20,7 @@ function AfterDownload()
 	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
 	if DOWNLOAD_COUNT == 0 then
 		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#FF001E\">Blitzcrank : Ass-Grabber</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
+		print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber |</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
 	end
 end
 
@@ -36,14 +36,14 @@ end
 
 if DOWNLOADING_LIBS then return end
 
-local UPDATE_NAME = "Blitzcrank : Ass-Grabber"
+local UPDATE_NAME = "| Blitzcrank | Ass-Grabber |"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20:%20Ass-Grabber.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "http://"..UPDATE_HOST..UPDATE_PATH
 
 
-function AutoupdaterMsg(msg) print("<b><font color=\"#FF001E\">"..UPDATE_NAME..":</font></b> <font color=\"#FF980F\">"..msg..".</font>") end
+function AutoupdaterMsg(msg) print("<b><font color=\"#FF001E\">"..UPDATE_NAME.."</font></b> <font color=\"#FF980F\">"..msg..".</font>") end
 if _G.UseUpdater then
 	local ServerData = GetWebResult(UPDATE_HOST, UPDATE_PATH)
 	if ServerData then
@@ -73,8 +73,8 @@ end
 ------------------------------------------------------
 
 function OnLoad()
-	print("<b><font color=\"#FF001E\">Blitzcrank : Ass-Grabber: </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	ts = TargetSelector(TARGET_LOW_HP, 1300, DAMAGE_MAGICAL, true)
+	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
+	ts = TargetSelector(TARGET_LOW_HP, 1250, DAMAGE_MAGICAL, true)
 	Variables()
 	Menu()
 end
@@ -82,19 +82,16 @@ end
 function OnTick()
 	ComboKey = Settings.combo.comboKey
 	ts:update()
+	local Target = ts.target
 	
-	local Target = GetTarget()
-	if Target == nil then
-		Target = ts.target
-	end
 	
 	SxOrb:ForceTarget(Target)
 	
-		if Target ~= nil then 
-			if ComboKey then
-				Combo(Target)
-			end
+	if Target ~= nil then
+		if ComboKey then
+			Combo(Target)
 		end
+	end
 	
 	KillSteall()
 	Checks()
@@ -102,16 +99,22 @@ end
 
 function OnDraw()
 
-	if not myHero.dead and Settings.drawing.stats then
-		DrawText("Pourcentage Grab done: " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 10, 200, 0xFFFFFF00)
-		DrawText("Grab Done:"..tostring(nbgrabwin),18, 10, 220, 0xFFFFFF00)
-		DrawText("Grab Miss:"..tostring(missedgrab),18, 10, 240, 0xFFFFFF00)
+	if Settings.drawstats.stats then
+		if Settings.drawstats.pourcentage then
+			DrawText("Pourcentage Grab done: " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 10, 200, 0xFFFFFF00)
+		end
+		if Settings.drawstats.grabdone then
+			DrawText("Grab Done:"..tostring(nbgrabwin),18, 10, 220, 0xFFFFFF00)
+		end
+		if Settings.drawstats.grabfail then
+			DrawText("Grab Miss:"..tostring(missedgrab),18, 10, 240, 0xFFFFFF00)
+		end
 	end
 
 	if not myHero.dead and not Settings.drawing.mDraw then	
-		if Target ~= nil then
-			local pos = WorldToScreen(D3DXVECTOR3(Target.x-100, Target.y-50, Target.z))
-			DrawText("Current Target:" .. Target.charName, 20, pos.x , pos.y, 0xFFFFFF00)
+		if ValidTarget(ts.target) then
+				DrawText3D("Current Target:" .. ts.target.charName,ts.target.x-100, ts.target.y-50, ts.target.z, 20)
+				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 		end
 	
 	
@@ -136,18 +139,22 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 
-function OnProcessSpell(unit, spell)
-
-    if spell.name == "RocketGrab" then
+function OnProcessSpell(enemy, spell)
+	
+	if spell.name == "summonerteleport" and enemy.isMe and Settings.extra.teleportW then 
+		CastW()
+	end
+	
+    if spell.name == "RocketGrab" and enemy.isMe then
 		nbgrabtotal=nbgrabtotal+1
 		missedgrab = (nbgrabtotal-nbgrabwin)
 		pourcentage =((nbgrabwin*100)/nbgrabtotal)
     end
 end
 
-function OnGainBuff(unit,buff) 
+function OnGainBuff(enemy,buff) 
 
-	if unit.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" then 
+	if enemy.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" and not enemy.isMe then 
 		nbgrabwin = nbgrabwin +1 
 		missedgrab = (nbgrabtotal-nbgrabwin)
 		pourcentage =((nbgrabwin*100)/nbgrabtotal)
@@ -155,43 +162,45 @@ function OnGainBuff(unit,buff)
 end
 
 function KillSteall()
-	for _, unit in pairs(GetEnemyHeroes()) do
-		local health = unit.health
-		local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
-			if health < dmgR and Settings.killsteal.useR and ValidTarget(unit) then
-				CastR(unit)
+	for _, enemy in pairs(GetEnemyHeroes()) do
+		local health = enemy.health
+		local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
+			if health < dmgR and Settings.killsteal.useR and ValidTarget(enemy) then
+				CastR(enemy)
 			end
 	 end
 end
 
-function Combo(unit)
-	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+function Combo(enemy)
+	if ValidTarget(enemy) and enemy ~= nil and enemy.type == myHero.type then
 	
-		CastQ(unit)
-		CastE(unit)
+		CastQ(enemy)
+		if Settings.combo.useE then 
+			CastE(enemy)
+		end
 		
 		if Settings.combo.useR then 
-			CastR(unit)
+			CastR(enemy)
 		end
 		if Settings.combo.RifKilable then
-				local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
-				if unit.health < dmgR then
-					CastR(unit)
+				local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
+				if enemy.health < dmgR then
+					CastR(enemy)
 				end
 		end
 	end
 end
 
-function CastE(unit)
-	if GetDistance(unit) <= SkillE.range and SkillE.ready then
+function CastE(enemy)
+	if GetDistance(enemy) <= SkillE.range and SkillE.ready then
 			Packet("S_CAST", {spellId = _E}):send()
-			myHero:Attack(unit)
+			myHero:Attack(enemy)
 	end	
 end
 
-function CastQ(unit)
-	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready then
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
+function CastQ(enemy)
+	if enemy ~= nil and GetDistance(enemy) <= SkillQ.range and SkillQ.ready then
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(enemy, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
 		
 		if HitChance >= 2 then
 			Packet("S_CAST", {spellId = _Q, fromX = CastPosition.x, fromY = CastPosition.z, toX = CastPosition.x, toY = CastPosition.z}):send()
@@ -199,10 +208,14 @@ function CastQ(unit)
 	end
 end
 
+function CastW()
+	if SkillW.ready then
+		Packet("S_CAST", {spellId = _W}):send()
+	end
+end
 
-
-function CastR(unit)
-	if GetDistance(unit) <= SkillR.range and SkillR.ready then
+function CastR(enemy)
+	if GetDistance(enemy) <= SkillR.range and SkillR.ready then
 		Packet("S_CAST", {spellId = _R}):send()
 	end	
 end
@@ -225,25 +238,22 @@ function Checks()
 end
 
 function Menu()
-	Settings = scriptConfig("| Blitzcrank : Ass-Grabber |", "AMBER")
+	Settings = scriptConfig("| | Blitzcrank | Ass-Grabber | |", "AMBER")
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
 		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
-	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, false)
-		
-		Settings.combo:permaShow("comboKey")
-		Settings.combo:permaShow("useR")
-		Settings.combo:permaShow("RifKilable")
-		Settings.killsteal:permaShow("useR")
+	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
 	
+	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
+	Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
-		Settings.drawing:addParam("mDraw", "Disable All Range Draws & Stats", SCRIPT_PARAM_ONOFF, false)
-		Settings.drawing:addParam("stats", "Draw Stats", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
 		Settings.drawing:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("myColor", "Draw My Range Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("qDraw", "Draw "..SkillQ.name.." (Q) Range", SCRIPT_PARAM_ONOFF, true)
@@ -251,12 +261,24 @@ function Menu()
 		Settings.drawing:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
+		Settings.drawstats:addParam("stats", "Draw Stats", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("pourcentage", "Show Pourcentage", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("grabdone", "Show Grab Done", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("grabfail", "Show Grab Fail", SCRIPT_PARAM_ONOFF, true)
+		
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
 		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillQ.range, DAMAGE_MAGIC, true)
+		Settings.combo:permaShow("comboKey")
+		Settings.combo:permaShow("useR")
+		Settings.combo:permaShow("RifKilable")
+		Settings.killsteal:permaShow("useR")
+		Settings.drawstats:permaShow("stats")
+	
 	TargetSelector.name = "Blitzcrank"
-	Settings:addTS(TargetSelector)
+	Settings:addTS(ts)
+	
 end
 
 function Variables()
