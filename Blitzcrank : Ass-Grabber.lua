@@ -1,4 +1,4 @@
-local version = "1.28"
+local version = "1.29"
 
 if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
 
@@ -323,13 +323,13 @@ function Menu()
 		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
 		Settings.combo:permaShow("comboKey")
+		Settings.combo:permaShow("useRafterE")
 		Settings.combo:permaShow("useR")
 		Settings.combo:permaShow("RifKilable")
 		Settings.killsteal:permaShow("useR")
 		Settings.drawstats:permaShow("stats")
 		Settings.extra:permaShow("teleportW")
 		Settings.extra:permaShow("baseW")
-		
 	
 	TargetSelector.name = "Blitzcrank"
 	Settings:addTS(ts)
