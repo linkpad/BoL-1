@@ -76,7 +76,7 @@ end
 ------------------------------------------------------
 
 function OnLoad()
-	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER_ |</font>")
+	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
 	TargetSelector = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
