@@ -1,4 +1,4 @@
-local version = "1.31"
+local version = "1.35"
 
 if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
 
@@ -8,6 +8,7 @@ local missedgrab = (nbgrabtotal-nbgrabwin)
 local pourcentage =0
 local ts
 local Target
+local timeran = os.clock()
 
  _G.UseUpdater = true
 
@@ -82,6 +83,7 @@ function OnLoad()
 end
 
 function OnTick()
+
 	ComboKey = Settings.combo.comboKey
 	
 	TargetSelector:update()
@@ -165,6 +167,28 @@ end
 ------------------------------------------------------
 ------------------------------------------------------
 ------------------------------------------------------
+function GenModelPacket(networkId, modelName, skinId) --Credits to Jorj
+	local p = CLoLPacket(0x001A)
+	p.vTable = 19025968
+	
+	p:EncodeF(networkId)
+	
+	-- EncodeStr broken
+	for c in modelName:gmatch'.' do
+		p:Encode1(string.byte(c))
+	end
+	for i = #modelName, 15 do p:Encode1(0) end
+	
+	p:Encode4(0)
+	p:Encode4(0)
+	p:Encode4(0xFF)
+	p:Encode4(skinId)
+	p:Encode4(0)
+	p:Encode1(0)
+	
+	RecvPacket(p)
+end
+
 
 function GetCustomTarget()
 	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1500) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
@@ -178,7 +202,72 @@ function GetCustomTarget()
 	end
 end
 
+function skinsfun()
+	if timeran ~= nil then
+		if Settings.skinchanger.skins == 1 then
+			GenModelPacket(myHero.networkID,myHero.charName, 0)
+			Settings.skinchanger.skins = 1
+		end
+		if Settings.skinchanger.skins == 2 then
+			GenModelPacket(myHero.networkID, myHero.charName, 1)
+			Settings.skinchanger.skins = 2
+		end
+		if Settings.skinchanger.skins == 3 then
+			GenModelPacket(myHero.networkID, myHero.charName, 2)
+			Settings.skinchanger.skins = 3
+		end
+		if Settings.skinchanger.skins == 4 then
+			GenModelPacket(myHero.networkID, myHero.charName, 3)
+			Settings.skinchanger.skins = 4
+		end
+		if Settings.skinchanger.skins == 5 then
+			GenModelPacket(myHero.networkID, myHero.charName, 4)
+			Settings.skinchanger.skins = 5
+		end
+		if Settings.skinchanger.skins == 6 then
+			GenModelPacket(myHero.networkID, myHero.charName, 5)
+			Settings.skinchanger.skins = 6
+		end
+		if Settings.skinchanger.skins == 7 then
+			GenModelPacket(myHero.networkID, myHero.charName, 6)
+			Settings.skinchanger.skins = 7
+		end
+		if Settings.skinchanger.skins == 8 then
+			GenModelPacket(myHero.networkID, myHero.charName, 7)
+			Settings.skinchanger.skins = 8
+		end
+	end
+end
+
 function OnWndMsg(Msg, Key)	
+
+	if timeran ~= nil then
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 1 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 2 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 3 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 4 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 5 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 6 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 7 then
+			skinsfun()
+		end
+		if Msg == WM_LBUTTONUP and Settings.skinchanger.skins == 8 then
+			skinsfun()
+		end
+	end
+	
 	if Msg == WM_LBUTTONDOWN then
 		local minD = 0
 		local Target = nil
@@ -223,7 +312,7 @@ end
 function OnGainBuff(enemy,buff)
 
 	if buff.name=="powerfistslow" and buff and buff.valid and not enemy.isMe then
-		if Settings.combo.useR then 
+		if Settings.combo.useR and Settings.combo.comboKey then 
 			if 	Settings.combo.useRafterE then
 				CastR(enemy)
 			end
@@ -231,6 +320,12 @@ function OnGainBuff(enemy,buff)
 	
 	end
 
+	if enemy.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" and not enemy.isMe then
+		if Settings.extra.autoE then
+			CastAutoE(enemy)
+		end
+	end
+	
 	if enemy.type == myHero.type and buff and buff.valid and buff.name == "rocketgrab2" and not enemy.isMe then 
 		nbgrabwin = nbgrabwin +1 
 		missedgrab = (nbgrabtotal-nbgrabwin)
@@ -252,9 +347,8 @@ function Combo(enemy)
 	if ValidTarget(enemy) and enemy ~= nil and enemy.type == myHero.type then
 	
 		CastQ(enemy)
-		if Settings.combo.useE then 
-			CastE(enemy)
-		end
+		
+		CastE(enemy)
 		
 		if Settings.combo.useR then 
 			if not Settings.combo.useRafterE then
@@ -270,6 +364,13 @@ function Combo(enemy)
 	end
 end
 
+function CastAutoE(enemy)
+	if SkillE.ready then
+			Packet("S_CAST", {spellId = _E}):send()
+			myHero:Attack(enemy)
+	end	
+end
+	
 function CastE(enemy)
 	if GetDistance(enemy) <= SkillE.range and SkillE.ready then
 			Packet("S_CAST", {spellId = _E}):send()
@@ -324,8 +425,8 @@ function Menu()
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.combo:addParam("useRafterE", "Use (R) After (E)", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
 	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
@@ -333,6 +434,10 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
 	Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
 	Settings.extra:addParam("baseW", "Auto use (W) when leave base", SCRIPT_PARAM_ONOFF, true)
+	Settings.extra:addParam("autoE","Auto use (E) after Grab", SCRIPT_PARAM_ONOFF, true)
+	
+	Settings:addSubMenu("["..myHero.charName.."] - Skin Changer", "skinchanger")
+	Settings.skinchanger:addParam("skins", "Skin Changer", SCRIPT_PARAM_LIST, 1, { "OFF", "1" , "2" , "3" , "4" , "5" , "6" , "7" })
 	
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
@@ -348,7 +453,7 @@ function Menu()
 		
 		
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
-		Settings.drawstats:addParam("stats", "Draw Stats", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("stats", "Show Stats & Passive's shield", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("pourcentage", "Show Pourcentage", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabdone", "Show Grab Done", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabfail", "Show Grab Fail", SCRIPT_PARAM_ONOFF, true)
@@ -365,6 +470,7 @@ function Menu()
 		Settings.drawstats:permaShow("stats")
 		Settings.extra:permaShow("teleportW")
 		Settings.extra:permaShow("baseW")
+		Settings.extra:permaShow("autoE")
 	
 	TargetSelector.name = "Blitzcrank"
 	Settings:addTS(TargetSelector)
@@ -374,7 +480,7 @@ end
 function Variables()
 	SkillQ = { name = "Rocket Grab", range = 925, delay = 0.25, speed = math.huge, width = 80, ready = false }
 	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = nil, ready = false }
-	SkillE = { name = "Power Fist", range = 250, delay = nil, speed = nil, width = nil, ready = false }
+	SkillE = { name = "Power Fist", range = 280, delay = nil, speed = nil, width = nil, ready = false }
 	SkillR = { name = "Static Field", range = 590, delay = 0.5, speed = math.huge, angle = 80, ready = false }
 	
 	VP = VPrediction()
