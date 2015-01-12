@@ -1,6 +1,6 @@
-local version = "1.30"
+local version = "1.31"
 
-if myHero.charName ~= "Blitzcrank" and not VIP_USER then return end
+if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
 
 local nbgrabwin = 0
 local nbgrabtotal = 0
