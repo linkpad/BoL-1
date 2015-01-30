@@ -271,7 +271,7 @@ function KillSteall()
 	for _, enemy in pairs(GetEnemyHeroes()) do
 		local health = enemy.health
 		local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
-			if health < dmgR and Settings.killsteal.useR and ValidTarget(enemy) then
+			if health < (dmgR*0.95) and Settings.killsteal.useR and ValidTarget(enemy) then
 				CastR(enemy)
 			end
 	 end
