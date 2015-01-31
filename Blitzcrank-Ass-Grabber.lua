@@ -134,7 +134,22 @@ function OnTick()
 end
 
 function OnDraw()
-  
+
+	if Settings.drawstats.stats then
+		if Settings.drawstats.pourcentage then
+			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
+		end
+		if Settings.drawstats.grabdone then
+			DrawText("Grab Done : "..tostring(nbgrabwin),18, 400, 940, 0xff00ff00)
+		end
+		if Settings.drawstats.grabfail then
+			DrawText("Grab Miss : "..tostring(missedgrab),18, 400, 960, 0xFFFF0000)
+		end
+		if Settings.drawstats.mana and test ~= nil then
+			DrawText("Passive's Shield : ".. tostring(math.ceil(test)) .. "HP" ,18, 400, 980, 0xffffff00)
+		end
+	end
+
 	if not myHero.dead and not Settings.drawing.mDraw then	
 		if ValidTarget(Target) then 
 			if Settings.drawing.text then 
@@ -215,6 +230,25 @@ function OnProcessSpell(unit, spell)
 	if spell.name == "summonerteleport" and unit.isMe and Settings.extra.teleportW then 
 		CastW()
 	end
+	
+	if spell.name == "RocketGrab" and unit.isMe then
+		nbgrabtotal=nbgrabtotal+1
+		missedgrab = (nbgrabtotal-nbgrabwin)
+		pourcentage =((nbgrabwin*100)/nbgrabtotal)
+    end
+end
+
+function OnGainBuff(unit , buff)
+
+	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
+		nbgrabwin = nbgrabwin + 0.2
+		missedgrab = (nbgrabtotal-nbgrabwin)
+		pourcentage =((nbgrabwin*100)/nbgrabtotal)
+	end	
+	
+end
+
+
 function KillSteall()
 	for _, unit in pairs(GetEnemyHeroes()) do
 		local health = unit.health
@@ -319,6 +353,14 @@ function Menu()
 		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("text", "Draw Current Target", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("targetcircle", "Draw Circle On Target", SCRIPT_PARAM_ONOFF, true)
+		
+		
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
+		Settings.drawstats:addParam("stats", "Show Stats & Passive's shield", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("pourcentage", "Show Pourcentage", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("grabdone", "Show Grab Done", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("grabfail", "Show Grab Fail", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawstats:addParam("mana", "Show Passive's shield", SCRIPT_PARAM_ONOFF, true)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
 		SxOrb:LoadToMenu(Settings.Orbwalking)
