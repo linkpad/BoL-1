@@ -1,6 +1,6 @@
 if not VIP_USER or myHero.charName ~= "Blitzcrank" then return end
 
-local  BlitzcrankAssGrabber_Version = 1.5
+local  BlitzcrankAssGrabber_Version = 1.6
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
