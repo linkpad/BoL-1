@@ -14,7 +14,7 @@ function AfterDownload()
 	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
 	if DOWNLOAD_COUNT == 0 then
 		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#FF001E\">| Karthus |</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
+		print("<b><font color=\"#FF001E\">| Blitzcrank : Ass-Grabber |</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
 	end
 end
 
@@ -30,9 +30,9 @@ end
 
 if DOWNLOADING_LIBS then return end
 
-local UPDATE_NAME = "Karthus"
+local UPDATE_NAME = "Blitzcrank : Ass-Grabber"
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/AMBER17/BoL/master/BlitzcrankNoSkinHack.lua" .. "?rand=" .. math.random(1, 10000)
+local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20:%20Ass-Grabber.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "http://"..UPDATE_HOST..UPDATE_PATH
 
