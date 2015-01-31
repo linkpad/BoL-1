@@ -1,4 +1,4 @@
-local version = 1.6
+local version = 1.60
 if not VIP_USER then return end
 
  _G.UseUpdater = true
