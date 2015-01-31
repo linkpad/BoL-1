@@ -1,5 +1,5 @@
-local version = "1.37"
-if myHero.charName ~= "Blitzcrank" or not VIP_USER then return end
+local version = 1.5
+if not VIP_USER then return end
 
  _G.UseUpdater = true
 
@@ -14,7 +14,7 @@ function AfterDownload()
 	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
 	if DOWNLOAD_COUNT == 0 then
 		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#FF001E\">| Blitzcrank : Ass-Grabber |</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
+		print("<b><font color=\"#FF001E\">| Karthus |</font></b> <font color=\"#FF980F\">Required libraries downloaded successfully, please reload (double F9).</font>")
 	end
 end
 
@@ -32,7 +32,7 @@ if DOWNLOADING_LIBS then return end
 
 local UPDATE_NAME = "Blitzcrank : Ass-Grabber"
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/AMBER17/BoL/master/Blitzcrank%20:%20Ass-Grabber.lua" .. "?rand=" .. math.random(1, 10000)
+local UPDATE_PATH = "/AMBER17/BoL/master/BlitzcrankNoSkinHack.lua" .. "?rand=" .. math.random(1, 10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "http://"..UPDATE_HOST..UPDATE_PATH
 
@@ -58,89 +58,106 @@ if _G.UseUpdater then
 	end
 end
 
+------------------------------------------------------
+------------------------------------------------------
+------------------------------------------------------
+--			 Callbacks				
+------------------------------------------------------
+------------------------------------------------------
+-----------------------------------------------------
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	print("<b><font color=\"#FF001E\">LITTLE FIX FOR 5.2 - WAITING BOL UPDATE </font></b>")
-	print("<b><font color=\"#FF001E\">Collision Dont Work - Be carrefull  </font></b>")
 	TargetSelector = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
 end
 
 function OnTick()
-	
+
 	KillSteall()
 	Checks()
+	ComboKey = Settings.combo.comboKey
+	
 	TargetSelector:update()
 	Target = GetCustomTarget()
 	SxOrb:ForceTarget(Target)
-	if unit ~= nil then
-		CastAutoR()
+
+	 test = tostring(math.ceil(ManashieldStrength()))
+	
+	if Settings.extra.baseW then 
+		local pos = Vector(1316,1300) 
+		if GetDistance(pos) < 800 then 
+			CastW() 
+		end
 	end
 	
+	if Settings.extra.baseW then 
+		local pos2 = Vector(13500,13600) 
+		if GetDistance(pos2) < 800 then 
+			CastW() 
+		end
+	end
 	
 	if Target ~= nil then
-		if Settings.combo.comboKey then
+		if ComboKey then
 			Combo(Target)
 		end
 	end
 end
 
 function OnDraw()
-	if not myHero.dead then	
-		if Target ~= nil then 
-			DrawText3D("Current Target",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFF00)
-			DrawCircle(Target.x, Target.y, Target.z, 150, ARGB(200,100 ,100,0 ))
+
+	if Settings.drawstats.stats then
+		if Settings.drawstats.pourcentage then
+			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
 		end
-	
+		if Settings.drawstats.grabdone then
+			DrawText("Grab Done : "..tostring(nbgrabwin),18, 400, 940, 0xff00ff00)
+		end
+		if Settings.drawstats.grabfail then
+			DrawText("Grab Miss : "..tostring(missedgrab),18, 400, 960, 0xFFFF0000)
+		end
 		if Settings.drawstats.mana and test ~= nil then
 			DrawText("Passive's Shield : ".. tostring(math.ceil(test)) .. "HP" ,18, 400, 980, 0xffffff00)
 		end
-		if SkillE.ready and Settings.Draw.DrawE then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, ARGB(200,50 ,100,0 ))
+	end
+
+	if not myHero.dead and not Settings.drawing.mDraw then	
+		if ValidTarget(Target) then 
+			if Settings.drawing.text then 
+				DrawText3D("Current Target",Target.x-100, Target.y-50, Target.z, 20, 0xFFFFFF00)
+			end
+			if Settings.drawing.targetcircle then 
+				DrawCircle(Target.x, Target.y, Target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+			end
 		end
-		if SkillQ.ready and Settings.Draw.DrawQ then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, ARGB(200,50 ,100,0 ))
+	
+	
+		if SkillQ.ready and Settings.drawing.qDraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 		end
-		if SkillR.ready and Settings.Draw.DrawR then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, ARGB(200,50 ,100,0 ))
+		if SkillR.ready and Settings.drawing.rDraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(Settings.drawing.rColor[2], Settings.drawing.rColor[3], Settings.drawing.rColor[4]))
+		end
+		
+		if Settings.drawing.myHero then
+			DrawCircle(myHero.x, myHero.y, myHero.z, myHero.range, RGB(Settings.drawing.myColor[2], Settings.drawing.myColor[3], Settings.drawing.myColor[4]))
 		end
 	end
 end
 
-function ManashieldStrength()
- local ShieldStrength = myHero.mana*0.5
- return ShieldStrength
-end
-
-
-function Checks()
-	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
-	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
-	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
-	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
-
-	 _G.DrawCircle = _G.oldDrawCircle 
-	 
-end
-
-function Variables()
-	SkillQ = { name = "Rocket Grab", range = 925, delay = 0.25, speed = math.huge, width = 80, ready = false }
-	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = nil, ready = false }
-	SkillE = { name = "Power Fist", range = 280, delay = nil, speed = nil, width = nil, ready = false }
-	SkillR = { name = "Static Field", range = 590, delay = 0.5, speed = math.huge, angle = 80, ready = false }
-	
-	VP = VPrediction()
-	
-	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
-	_G.DrawCircle = DrawCircle2
-end
-
+------------------------------------------------------
+------------------------------------------------------
+------------------------------------------------------
+--			 Functions				
+------------------------------------------------------
+------------------------------------------------------
+------------------------------------------------------
 
 
 function GetCustomTarget()
-	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1500) then
+	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1500) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
 		return SelectedTarget
 	end
 	TargetSelector:update()	
@@ -176,70 +193,50 @@ function OnWndMsg(Msg, Key)
 	end
 end
 
-
-
-function DrawCircle2(x, y, z, radius, color)
-  local vPos1 = Vector(x, y, z)
-  local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
-  local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
-  local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
+function ManashieldStrength()
+ local ShieldStrength = myHero.mana*0.5
+ return ShieldStrength
 end
 
+function OnProcessSpell(enemy, spell)
+	
+	if spell.name == "summonerteleport" and enemy.isMe and Settings.extra.teleportW then 
+		CastW()
+	end
+end
+
+
+function KillSteall()
+	for _, enemy in pairs(GetEnemyHeroes()) do
+		local health = enemy.health
+		local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
+			if health < dmgR*0.95 and Settings.killsteal.useR and ValidTarget(enemy) then
+				CastR(enemy)
+			end
+	 end
+end
 
 function Combo(enemy)
-	CastQ(enemy)
-	CastE(enemy)
-	if Settings.combo.useR then 
-		CastR(enemy)
-	end
-	if Settings.combo.RifKilable then
-		local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
-		if enemy.health < dmgR then
-			CastR(enemy)
+	if ValidTarget(enemy) and enemy ~= nil and enemy.type == myHero.type then
+	
+		CastQ(enemy)
+		
+		CastE(enemy)
+		
+		if Settings.combo.useR then 
+			if not Settings.combo.useRafterE then
+				CastR(enemy)
 			end
 		end
+		if Settings.combo.RifKilable then
+				local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
+				if enemy.health < dmgR then
+					CastR(enemy)
+				end
+		end
 	end
-
-
-function Menu()
-	Settings = scriptConfig("| | Blitzcrank | Ass-Grabber | |", "AMBER")
-	
-	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
-		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
-		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
-		
-	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
-	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
-	
-	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
-		Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
-		Settings.extra:addParam("baseW", "Auto use (W) when leave base", SCRIPT_PARAM_ONOFF, true)
-	
-	Settings:addSubMenu("["..myHero.charName.."] - Draw", "Draw")
-		Settings.Draw:addParam("DrawQ", "Draw (Q)", SCRIPT_PARAM_ONOFF, true)
-		Settings.Draw:addParam("DrawE", "Draw (E)", SCRIPT_PARAM_ONOFF, true)
-		Settings.Draw:addParam("DrawR", "Draw (R)", SCRIPT_PARAM_ONOFF, true)
-		
-	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
-		Settings.drawstats:addParam("mana", "Show Passive's shield", SCRIPT_PARAM_ONOFF, true)
-		
-	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
-		SxOrb:LoadToMenu(Settings.Orbwalking)
-	
-		Settings.combo:permaShow("comboKey")
-		Settings.combo:permaShow("useR")
-		Settings.combo:permaShow("RifKilable")
-		Settings.killsteal:permaShow("useR")
-		Settings.extra:permaShow("teleportW")
-		Settings.extra:permaShow("baseW")
-	
-	TargetSelector.name = "Blitzcrank"
-	Settings:addTS(TargetSelector)
-	
 end
-
+	
 function CastE(enemy)
 	if GetDistance(enemy) <= SkillE.range and SkillE.ready then
 			Packet("S_CAST", {spellId = _E}):send()
@@ -269,14 +266,88 @@ function CastR(enemy)
 	end	
 end
 
-function KillSteall()
-	for _, enemy in pairs(GetEnemyHeroes()) do
-		local health = enemy.health
-		local dmgR = getDmg("R", enemy, myHero) + (myHero.ap)
-			if health < dmgR and Settings.killsteal.useR and ValidTarget(enemy) then
-				CastR(enemy)
-			end
-	 end
+------------------------------------------------------
+------------------------------------------------------
+------------------------------------------------------
+--			MENU & CHECKS
+------------------------------------------------------
+------------------------------------------------------
+------------------------------------------------------
+
+function Checks()
+	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
+	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
+	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
+	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
+
+	 _G.DrawCircle = _G.oldDrawCircle 
+	 
 end
 
-assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("SFIGGLGELLH") 
+function Menu()
+	Settings = scriptConfig("| | Blitzcrank | Ass-Grabber | |", "AMBER")
+	
+	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
+		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:addParam("RifKilable", "Use (R) if enemy is kilable", SCRIPT_PARAM_ONOFF, true)
+		
+	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
+	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
+	
+	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
+	Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
+	Settings.extra:addParam("baseW", "Auto use (W) when leave base", SCRIPT_PARAM_ONOFF, true)
+	
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
+		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
+		Settings.drawing:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("myColor", "Draw My Range Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
+		Settings.drawing:addParam("qDraw", "Draw "..SkillQ.name.." (Q) Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("qColor", "Draw "..SkillQ.name.." (Q) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
+		Settings.drawing:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
+		Settings.drawing:addParam("text", "Draw Current Target", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("targetcircle", "Draw Circle On Target", SCRIPT_PARAM_ONOFF, true)
+		
+		
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
+		Settings.drawstats:addParam("mana", "Show Passive's shield", SCRIPT_PARAM_ONOFF, true)
+		
+	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
+		SxOrb:LoadToMenu(Settings.Orbwalking)
+	
+		Settings.combo:permaShow("comboKey")
+		Settings.combo:permaShow("useR")
+		Settings.combo:permaShow("RifKilable")
+		Settings.killsteal:permaShow("useR")
+		Settings.extra:permaShow("teleportW")
+		Settings.extra:permaShow("baseW")
+	
+	TargetSelector.name = "Blitzcrank"
+	Settings:addTS(TargetSelector)
+	
+end
+
+function Variables()
+	SkillQ = { name = "Rocket Grab", range = 925, delay = 0.25, speed = math.huge, width = 80, ready = false }
+	SkillW = { name = "Overdrive", range = nil, delay = 0.375, speed = math.huge, width = nil, ready = false }
+	SkillE = { name = "Power Fist", range = 280, delay = nil, speed = nil, width = nil, ready = false }
+	SkillR = { name = "Static Field", range = 590, delay = 0.5, speed = math.huge, angle = 80, ready = false }
+	
+	VP = VPrediction()
+	local ts
+	local Target
+
+	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
+	_G.DrawCircle = DrawCircle2
+end
+
+
+function DrawCircle2(x, y, z, radius, color)
+  local vPos1 = Vector(x, y, z)
+  local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
+  local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
+  local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
+end
