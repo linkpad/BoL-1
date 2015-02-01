@@ -1,7 +1,7 @@
 if myHero.charName ~= "Leona" or not VIP_USER then return end
 
 
-local  LeonaPutYourSunglasses_Version = 1.0
+local  LeonaPutYourSunglasses_Version = 1.1
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
