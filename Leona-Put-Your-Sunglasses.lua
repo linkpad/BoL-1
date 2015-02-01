@@ -1,6 +1,6 @@
 if myHero.charName ~= "Leona" or not VIP_USER then return end
 
-local  LeonaPutYourSunglasses_Version = 2.1
+local  LeonaPutYourSunglasses_Version = 2.2
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -56,8 +56,8 @@ end
 local ForceReload = false
 SxUpdate(LeonaPutYourSunglasses_Version,
 	"raw.githubusercontent.com",
-	"/AMBER17/BoL/master/Leona-Put-Your-SunGlasses.version",
-	"/AMBER17/BoL/master/Leona-Put-Your-SunGlasses.lua",
+	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.version",
+	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.lua",
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
 	function(NewVersion) if NewVersion > LeonaPutYourSunglasses_Version then print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
 end)
@@ -85,7 +85,6 @@ else
 		function(NewVersion) if NewVersion > 0 then print("<font color=\"#F0Ff8d\"><b>VPrediction: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true end 
 	end)
 end
-
 function OnLoad()
 	
 	require "SxOrbwalk" 
