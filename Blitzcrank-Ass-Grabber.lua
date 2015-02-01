@@ -1,6 +1,6 @@
 if not VIP_USER or myHero.charName ~= "Blitzcrank" then return end
 
-local  BlitzcrankAssGrabber_Version = 1.6
+local  BlitzcrankAssGrabber_Version = 1.7
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -58,7 +58,7 @@ SxUpdate(BlitzcrankAssGrabber_Version,
 	"raw.githubusercontent.com",
 	"/AMBER17/BoL/master/Blitzcrank-Ass-Grabber.Version",
 	"/AMBER17/BoL/master/Blitzcrank-Ass-Grabber.lua",
-	SCRIPT_PATH.."/Blitzcrank-Ass-Grabber.lua",
+	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
 	function(NewVersion) if NewVersion > BlitzcrankAssGrabber_Version then print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
 end)
 	
