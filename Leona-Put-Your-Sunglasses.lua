@@ -231,7 +231,7 @@ end
 
 
 function Menu()
-Settings = scriptConfig("Leona Private", "AMBER")
+Settings = scriptConfig("Leona Put Your Sunglasses", "AMBER")
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
