@@ -322,7 +322,7 @@ function Menu()
 		Settings.KillSteal:addParam("UseR", "Use (R) for KS", SCRIPT_PARAM_ONOFF, true)
 		
 	Settings:addSubMenu("["..myHero.charName.."] - Auto E ", "AutoUlt")
-		Settings.AutoUlt:addParam("UseAutoE", "Auto E if X enemie", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("V"))
+		Settings.AutoUlt:addParam("UseAutoE", "Auto E if X enemie", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N"))
 		Settings.AutoUlt:addParam("ARX", "X = ", SCRIPT_PARAM_SLICE, 3, 1, 5, 0)
 		
 	
