@@ -56,7 +56,7 @@ end
 local ForceReload = false
 SxUpdate(DariusPentaDunk_Version,
 	"raw.githubusercontent.com",
-	"/AMBER17/BoL/master/Darius-PentaDunk.Version",
+	"/AMBER17/BoL/master/Darius-PentaDunk.version",
 	"/AMBER17/BoL/master/Darius-PentaDunk.lua",
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
 	function(NewVersion) if NewVersion > DariusPentaDunk_Version then print("<font color=\"#F0Ff8d\"><b>Darius PentaDunk : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Darius PentaDunk : </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
@@ -358,8 +358,6 @@ function OnGainBuff(unit, buff)
 
 	if buff.name=="dariushemo" and not unit.isMe and unit == Target then
 		DariusP = 1
-		--print(Target)
-		--print(DariusP)
 	end
 	
 end
@@ -369,8 +367,6 @@ function OnUpdateBuff(unit, buff)
 
 	if buff.name=="dariushemo" and not unit.isMe  and unit == Target then
 		DariusP = DariusP + 1
-		--print(Target)
-		--print(DariusP)
 	end
 	
 end
