@@ -1,7 +1,6 @@
 if myHero.charName ~= "Leona" or not VIP_USER then return end
 
-
-local  LeonaPutYourSunglasses_Version = 2.0
+local  LeonaPutYourSunglasses_Version = 2.1
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -57,8 +56,8 @@ end
 local ForceReload = false
 SxUpdate(LeonaPutYourSunglasses_Version,
 	"raw.githubusercontent.com",
-	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.version",
-	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.lua",
+	"/AMBER17/BoL/master/Leona-Put-Your-SunGlasses.version",
+	"/AMBER17/BoL/master/Leona-Put-Your-SunGlasses.lua",
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
 	function(NewVersion) if NewVersion > LeonaPutYourSunglasses_Version then print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
 end)
@@ -85,6 +84,18 @@ else
 		LIB_PATH.."/VPrediction.lua",
 		function(NewVersion) if NewVersion > 0 then print("<font color=\"#F0Ff8d\"><b>VPrediction: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true end 
 	end)
+end
+
+function OnLoad()
+	
+	require "SxOrbwalk" 
+	require "VPrediction"
+	print("<b><font color=\"#FF001E\"></font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
+	TargetSelector = TargetSelector(TARGET_MOST_AD, 1500, DAMAGE_MAGICAL, false, true)
+	Variables()
+	Menu()
+	Target = GetCustomTarget()
+
 end
 
 function OnTick()
@@ -129,7 +140,7 @@ function Checks()
 	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
 	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
 
-	 _G.DrawCircle = _G.oldDrawCircle 
+	_G.DrawCircle = _G.oldDrawCircle 
 	 
 	 
 end
