@@ -1,6 +1,6 @@
 if not VIP_USER or myHero.charName ~= "Blitzcrank" then return end
 
-local  BlitzcrankAssGrabber_Version = 1.7
+local  BlitzcrankAssGrabber_Version = 1.8
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -95,13 +95,14 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game !!! </font><font color=\"#FF001E\">| AMBER |</font>")
+	if ForceReload then return end
 	TargetSelector = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
 end
 
 function OnTick()
-
+	if ForceReload then return end
 	KillSteall()
 	Checks()
 	ComboKey = Settings.combo.comboKey
@@ -134,7 +135,7 @@ function OnTick()
 end
 
 function OnDraw()
-
+	if ForceReload then return end
 	if Settings.drawstats.stats then
 		if Settings.drawstats.pourcentage then
 			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
@@ -197,7 +198,7 @@ end
 
 
 function OnWndMsg(Msg, Key)	
-	
+	if ForceReload then return end
 	if Msg == WM_LBUTTONDOWN then
 		local minD = 0
 		local Target = nil
@@ -226,7 +227,7 @@ function ManashieldStrength()
 end
 
 function OnProcessSpell(unit, spell)
-	
+	if ForceReload then return end
 	if spell.name == "summonerteleport" and unit.isMe and Settings.extra.teleportW then 
 		CastW()
 	end
@@ -239,7 +240,7 @@ function OnProcessSpell(unit, spell)
 end
 
 function OnGainBuff(unit , buff)
-
+	if ForceReload then return end
 	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
 		nbgrabwin = nbgrabwin + 0.2
 		missedgrab = (nbgrabtotal-nbgrabwin)
