@@ -1,6 +1,6 @@
 if myHero.charName ~= "Leona" or not VIP_USER then return end
 
-local  LeonaPutYourSunglasses_Version = 2.3
+local  LeonaPutYourSunglasses_Version = 2.4
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -87,8 +87,6 @@ else
 end
 function OnLoad()
 	
-	require "SxOrbwalk" 
-	require "VPrediction"
 	print("<b><font color=\"#FF001E\"></font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
 	TargetSelector = TargetSelector(TARGET_MOST_AD, 1500, DAMAGE_MAGICAL, false, true)
 	Variables()
