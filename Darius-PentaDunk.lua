@@ -1,6 +1,6 @@
 if myHero.charName ~= "Darius" or not VIP_USER then return end 
 
-local  DariusPentaDunk_Version = 1.0
+local  DariusPentaDunk_Version = 1.1
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -358,6 +358,8 @@ function OnGainBuff(unit, buff)
 
 	if buff.name=="dariushemo" and not unit.isMe and unit == Target then
 		DariusP = 1
+		--print(Target)
+		--print(DariusP)
 	end
 	
 end
@@ -367,6 +369,8 @@ function OnUpdateBuff(unit, buff)
 
 	if buff.name=="dariushemo" and not unit.isMe  and unit == Target then
 		DariusP = DariusP + 1
+		--print(Target)
+		--print(DariusP)
 	end
 	
 end
