@@ -308,7 +308,7 @@ end
 
 
 function Menu()
-	Settings = scriptConfig("| | Darius | |", "AMBER")
+	Settings = scriptConfig("Darius - PentaDunk", "AMBER")
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
