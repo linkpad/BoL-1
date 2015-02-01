@@ -1,6 +1,6 @@
 if myHero.charName ~= "Leona" or not VIP_USER then return end
 
-local  LeonaPutYourSunglasses_Version = 2.2
+local  LeonaPutYourSunglasses_Version = 2.3
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -59,7 +59,7 @@ SxUpdate(LeonaPutYourSunglasses_Version,
 	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.version",
 	"/AMBER17/BoL/master/Leona-Put-Your-Sunglasses.lua",
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
-	function(NewVersion) if NewVersion > LeonaPutYourSunglasses_Version then print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
+	function(NewVersion) if NewVersion > LeonaPutYourSunglasses_Version then print("<font color=\"#F0Ff8d\"><b>Leona Put Your Sunglasses : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>Leona Put Your Sunglasses: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
 end)
 	
 if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
