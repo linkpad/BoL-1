@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.3
+local  IreliaMasterBlades_Version = 1.4
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -219,7 +219,7 @@ function Combo(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
 		
 		if Settings.combo.UseQ then
-			CastQ_bilbaotest(unit)
+			CastQ(unit)
 		end
 		if Settings.combo.UseW then
 			CastW(unit)
@@ -269,25 +269,6 @@ function LaneClearMode()
 end
 
 function CastQ(unit)
-	if GetDistance(unit) <= SkillQ.range and SkillQ.ready then
-	Packet("S_CAST", {spellId = _Q, targetNetworkId = unit.networkID}):send()
-	end
-	if Settings.combo.UseQminion then 
-		if GetDistance(unit) > SkillQ.range and SkillQ.ready then
-			enemyMinions:update()		
-			for i, minion in pairs(enemyMinions.objects) do
-				if ValidTarget(minion) and minion ~= nil then
-					qDmg = getDmg("Q", minion, myHero) + getDmg("AD", minion, myHero)
-					if GetDistance(minion) <= SkillQ.range and minion.health <= qDmg then 
-						Packet("S_CAST", {spellId = _Q, targetNetworkId = minion.networkID}):send()
-					end		 
-				end
-			end
-		end
-	end
-end	
-
-function CastQ_bilbaotest(unit)
 	if GetDistance(unit) <= SkillQ.range and SkillQ.ready then
 		Packet("S_CAST", {spellId = _Q, targetNetworkId = unit.networkID}):send()
 	elseif Settings.combo.UseQminion then 
@@ -346,7 +327,7 @@ function CastR(unit)
 end
 
 function OnProcessSpell(unit, spell)
-	if Settings.combo.UseRAfter then
+	if Settings.combo.UseRAfter and Settings.combo.UseR then
 		if spell.name == "IreliaGatotsu" and unit.type == myHero.type and unit.isMe and spell.target and spell.target.type == myHero.type then
 			for i = 1, 4 do
 				CastR(spell.target)
@@ -365,7 +346,7 @@ function Menu()
 		Settings.combo:addParam("UseW", "Use (W) in combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.combo:addParam("UseE", "Use (E) in combo", SCRIPT_PARAM_ONOFF, false)
 		Settings.combo:addParam("Estunt", "Use only (E) If Stunt enemy", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("UseR", "Use (R) in combo", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:addParam("UseR", "Use (R) in combo", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N"))
 		Settings.combo:addParam("UseRAfter", "Use (R) only after Q", SCRIPT_PARAM_ONOFF, true)
 		
 		
