@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.4
+local  IreliaMasterBlades_Version = 1.5
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -275,7 +275,7 @@ function CastQ(unit)
 		enemyMinions:update()
 		local bestMinion = nil
 		for i, minion in pairs(enemyMinions.objects) do
-			if ValidTarget(minion) and minion.health < (getDmg("Q", minion, myHero)*0.99) and GetDistance(myHero, minion) < SkillQ.range then
+			if ValidTarget(minion) and minion.health < getDmg("Q", unit, myHero) +(myHero.addDamage+myHero.damage) and GetDistance(myHero, minion) < SkillQ.range then
 				if GetDistance(unit, minion) < SkillQ.range then
 					bestMinion = minion
 				end		
