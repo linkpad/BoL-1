@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.0
+local  IreliaMasterBlades_Version = 1.1
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -402,6 +402,7 @@ function Menu()
 		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
 		Settings.combo:permaShow("comboKey")
+		Settings.LaneClear:permaShow("LaneClear")
 		Settings.combo:permaShow("UseR")
 		Settings.combo:permaShow("UseRAfter")
 		Settings.combo:permaShow("Estunt")
