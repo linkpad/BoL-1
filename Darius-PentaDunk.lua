@@ -1,6 +1,6 @@
 if myHero.charName ~= "Darius" or not VIP_USER then return end 
 
-local  DariusPentaDunk_Version = 1.4
+local  DariusPentaDunk_Version = 1.5
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -88,7 +88,7 @@ end
 
 function OnLoad()
 	print("<b><font color=\"#FF001E\">| Darius PentaDunk|</font></b><font color=\"#FF980F\"> Have a Good Game </font><font color=\"#FF001E\">| AMBER |</font>")
-	TargetSelector = TargetSelector(TARGET_LOW_HP , 1000, DAMAGE_PHYSICAL, false, true)
+	TargetSelector = TargetSelector(TARGET_LOW_HP , 600, DAMAGE_PHYSICAL, false, true)
 	Variables()
 	Menu()
 end
