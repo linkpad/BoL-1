@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.8
+local  IreliaMasterBlades_Version = 1.0
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
