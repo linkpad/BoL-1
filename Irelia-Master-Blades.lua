@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.6
+local  IreliaMasterBlades_Version = 1.7
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -342,19 +342,21 @@ end
 
 function KillSteal()
 	for _, unit in pairs(GetEnemyHeroes()) do
-		local dmgQ = getDmg("Q", unit, myHero) + (myHero.addDamage+myHero.damage)
-		local dmgE = getDmg("E", unit, myHero) + (myHero.ap/2)
-		local dmgR = getDmg("R", unit, myHero) + (myHero.ap/2)+(myHero.addDamage*0.6)
-		if Settings.KillSteal.UseQ then
-			if unit.health <= dmgQ*0.95 then
-				CastQ(unit)
+		if not unit.dead then
+			local dmgQ = getDmg("Q", unit, myHero) + (myHero.addDamage+myHero.damage)
+			local dmgE = getDmg("E", unit, myHero) + (myHero.ap/2)
+			local dmgR = getDmg("R", unit, myHero) + (myHero.ap/2)+(myHero.addDamage*0.6)
+			if Settings.KillSteal.UseQ then
+				if unit.health <= dmgQ*0.95 then
+					CastQ(unit)
+				end
+			end
+			if Settings.KillSteal.UseR then
+				if unit.health <= (dmgR*0.95)*Settings.KillSteal.numberR then
+					CastR(unit)
+				end
 			end
 		end
-		if Settings.KillSteal.UseR then
-			if unit.health <= (dmgR*0.95)*Settings.KillSteal.numberR then
-				CastR(unit)
-			end
-		end	
 	end
 end
 
