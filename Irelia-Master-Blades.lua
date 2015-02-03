@@ -1,6 +1,6 @@
 if myHero.charName ~= "Irelia" or not VIP_USER then return end 
 
-local  IreliaMasterBlades_Version = 1.5
+local  IreliaMasterBlades_Version = 1.6
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -98,15 +98,21 @@ end
 function OnTick()
 	if os.clock() - LastTick < 0.01 then return end
 	Checks()
+	
 	KillSteal()
 	ComboKey = Settings.combo.comboKey	
 	LaneClear = Settings.LaneClear.LaneClear
+	Harass = Settings.Harass.Harass
 	TargetSelector:update()
 	Target = GetCustomTarget()
 	SxOrb:ForceTarget(Target)
 	
 	if LaneClear then
 		LaneClearMode()
+	end
+	
+	if Harass then
+		HarassMode(Target)
 	end
 	
 	if Target ~= nil then
@@ -131,7 +137,7 @@ function Variables()
 	SkillQ = { range = 650, delay = 0.1, speed = math.huge, width = nil, ready = false }
 	SkillW = { range = 125, delay = 0.1, speed = math.huge, width = nil, ready = false }
 	SkillE = { range = 340 , delay = 0.1, speed = math.huge, width = nil, ready = false }
-	SkillR = { range = 1200, delay = 0.1, speed = math.huge, width = 40, ready = false }
+	SkillR = { range = 1000, delay = 0.1, speed = math.huge, width = 40, ready = false }
 	LastTick = 0
 	DariusP = 0
 	enemyMinions = minionManager(MINION_ENEMY, SkillQ.range, myHero, MINION_SORT_HEALTH_ASC)
@@ -165,6 +171,10 @@ function OnDraw()
 	
 		if SkillQ.ready and Settings.drawing.qDraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+		end
+		
+		if SkillE.ready and Settings.drawing.eDraw then 
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, RGB(Settings.drawing.eColor[2], Settings.drawing.eColor[3], Settings.drawing.eColor[4]))
 		end
 		
 		if SkillR.ready and Settings.drawing.rDraw then 
@@ -215,7 +225,7 @@ end
 
 
 function Combo(unit)
-
+	TargetSelector:update()
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
 		
 		if Settings.combo.UseQ then
@@ -233,30 +243,16 @@ function Combo(unit)
 		if Settings.combo.UseR and not Settings.combo.UseRAfter then
 			CastR(unit)
 		end
-	end
-end
-
-function KillSteal()
-	for _, unit in pairs(GetEnemyHeroes()) do
-		local dmgQ = getDmg("Q", unit, myHero) + (myHero.addDamage+myHero.damage)
-		local dmgE = getDmg("E", unit, myHero) + (myHero.ap/2)
-		local dmgR = getDmg("R", unit, myHero) + (myHero.ap/2)+(myHero.addDamage*0.6)
-		if Settings.KillSteal.UseQ then
-			if unit.health <= dmgQ*0.95 then
-				CastQ(unit)
-			end
+		
+		if Settings.combo.UseRAfter then
+			CastR2(unit)
 		end
-		if Settings.KillSteal.UseR then
-			if unit.health <= (dmgR*0.95)*Settings.KillSteal.numberR then
-				CastR(unit)
-			end
-		end	
 	end
 end
 
 function LaneClearMode()
 	enemyMinions:update()
-	if Settings.LaneClear.UseQ then
+	if Settings.LaneClear.UseQ and SkillQ.ready and ManaManagementLaneClear()then
 		for i, minion in pairs(enemyMinions.objects) do
 			if ValidTarget(minion) and minion ~= nil then
 				qDmg = getDmg("Q", minion, myHero) + getDmg("AD", minion, myHero)
@@ -266,6 +262,9 @@ function LaneClearMode()
 			end
 		end
 	end
+end
+
+function CheckJump()
 end
 
 function CastQ(unit)
@@ -291,6 +290,11 @@ function CastQ(unit)
 	end
 end
 
+function CastQharass(unit)
+	if GetDistance(unit) <= 320 and SkillQ.ready then
+		Packet("S_CAST", {spellId = _Q, targetNetworkId = unit.networkID}):send()
+	end
+end
 
 
 	
@@ -326,13 +330,61 @@ function CastR(unit)
 	end
 end
 
-function OnProcessSpell(unit, spell)
-	if Settings.combo.UseRAfter and Settings.combo.UseR then
-		if spell.name == "IreliaGatotsu" and unit.type == myHero.type and unit.isMe and spell.target and spell.target.type == myHero.type then
-			for i = 1, 4 do
-				CastR(spell.target)
-			end	
+function CastR2(unit)
+	if unit ~= nil and GetDistance(unit) <= 650 and SkillR.ready then
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillR.delay, SkillR.width, SkillR.range, SkillR.speed, myHero, false)	
+		
+		if HitChance >= 2 then
+			Packet("S_CAST", {spellId = _R, fromX = CastPosition.x, fromY = CastPosition.z, toX = CastPosition.x, toY = CastPosition.z}):send()
 		end
+	end
+end
+
+function KillSteal()
+	for _, unit in pairs(GetEnemyHeroes()) do
+		local dmgQ = getDmg("Q", unit, myHero) + (myHero.addDamage+myHero.damage)
+		local dmgE = getDmg("E", unit, myHero) + (myHero.ap/2)
+		local dmgR = getDmg("R", unit, myHero) + (myHero.ap/2)+(myHero.addDamage*0.6)
+		if Settings.KillSteal.UseQ then
+			if unit.health <= dmgQ*0.95 then
+				CastQ(unit)
+			end
+		end
+		if Settings.KillSteal.UseR then
+			if unit.health <= (dmgR*0.95)*Settings.KillSteal.numberR then
+				CastR(unit)
+			end
+		end	
+	end
+end
+
+function HarassMode(unit)
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type and ManaManagementHarass() then
+		if Settings.Harass.UseQ then
+			CastQharass(unit)
+		end
+		if Settings.Harass.UseE then
+			CastE(unit)
+		end
+		if Settings.Harass.UseZ then
+			CastW(unit)
+		end
+	end		
+end
+
+function ManaManagementLaneClear()
+	if myHero.mana > Settings.LaneClear.Mana then
+		return true
+	else
+		return false
+	end
+end
+
+function ManaManagementHarass()
+	if myHero.mana > Settings.Harass.Mana then
+		return true
+	else
+		return false
 	end
 end
 
@@ -349,10 +401,18 @@ function Menu()
 		Settings.combo:addParam("UseR", "Use (R) in combo", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("N"))
 		Settings.combo:addParam("UseRAfter", "Use (R) only after Q", SCRIPT_PARAM_ONOFF, true)
 		
+	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
+		Settings.Harass:addParam("Harass", "Harass Key", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.Harass:addParam("UseW", "Use (Z) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.Harass:addParam("Mana", "Harass if Mana > X", SCRIPT_PARAM_SLICE, 300, 1, 600, 0)
+		
 		
 	Settings:addSubMenu("["..myHero.charName.."] - LaneClear Settings", "LaneClear")
 		Settings.LaneClear:addParam("LaneClear", "LaneClear Key", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("X"))
 		Settings.LaneClear:addParam("UseQ", "Use (Q) in LaneClear", SCRIPT_PARAM_ONOFF, true)
+		Settings.LaneClear:addParam("Mana", "Use (Q) if Mana > X", SCRIPT_PARAM_SLICE, 300, 1, 600, 0)
 		
 		
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal Settings", "KillSteal")
@@ -367,6 +427,8 @@ function Menu()
 		Settings.drawing:addParam("myColor", "Draw My Range Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("qDraw", "Draw (Q) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("qColor", "Draw (Q) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
+		Settings.drawing:addParam("eDraw", "Draw (E) Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("eColor", "Draw (E) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("rDraw", "Draw (R) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("rColor", "Draw (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("text", "Draw Current Target", SCRIPT_PARAM_ONOFF, true)
@@ -377,6 +439,8 @@ function Menu()
 		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
 		Settings.combo:permaShow("comboKey")
+		Settings.Harass:permaShow("Harass")
+		Settings.LaneClear:permaShow("LaneClear")
 		Settings.combo:permaShow("UseR")
 		Settings.combo:permaShow("UseRAfter")
 		Settings.combo:permaShow("Estunt")
