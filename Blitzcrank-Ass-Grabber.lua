@@ -239,6 +239,7 @@ function OnProcessSpell(unit, spell)
     end
 end
 
+--[[
 function OnGainBuff(unit , buff)
 	if ForceReload then return end
 	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
@@ -248,7 +249,15 @@ function OnGainBuff(unit , buff)
 	end	
 	
 end
+]]
 
+function OnApplyBuff(source, unit, buff)
+	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
+		nbgrabwin = nbgrabwin + 0.2
+		missedgrab = (nbgrabtotal-nbgrabwin)
+		pourcentage =((nbgrabwin*100)/nbgrabtotal)
+	end	
+end
 
 function KillSteall()
 	for _, unit in pairs(GetEnemyHeroes()) do
