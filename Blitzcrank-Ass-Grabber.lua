@@ -253,7 +253,7 @@ end
 
 function OnApplyBuff(source, unit, buff)
 	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
-		nbgrabwin = nbgrabwin + 0.2
+		nbgrabwin = nbgrabwin + 1
 		missedgrab = (nbgrabtotal-nbgrabwin)
 		pourcentage =((nbgrabwin*100)/nbgrabtotal)
 	end	
