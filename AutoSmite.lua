@@ -14,7 +14,7 @@
                                                                                              
 ]]
 
-local AutoSmite_Version = 1.3
+local AutoSmite_Version = 1.4
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -80,6 +80,12 @@ end)
 function OnLoad()
 	Variable()
 	Menu()
+	if myHero.charName == "Chogath" then
+		print("<font color=\"#F0Ff8d\"><b>Cho'Gath Supported Champ ! Have Fun </b></font>")
+		rDmg = 0
+	else
+		print("<font color=\"#F0Ff8d\"><b> Champion Not Supported ! Only AutoSmite Use ! Have Fun </b></font>")
+	end
 end
 
 function OnTick()
@@ -94,15 +100,61 @@ function OnDraw()
 	if not myHero.dead then
 		if Settings.Draw.drawSmite then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Smite.range, RGB(100, 44, 255))
+			if myHero.charName == "Chogath" and Rready then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 300, RGB(100, 44, 255))
+			end 
 		end
 		if Settings.Draw.drawSmitable then
 			local minion = checkSmite()
-			if ValidMinion(minion) and Smite.ready then 
-				local dmg = minion.health - smiteDmg
-				if minion.health > smiteDmg then
-					DrawText3D(tostring(math.ceil(dmg)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+			if ValidMinion(minion) then 
+				local dmg1 = minion.health - smiteDmg
+				if myHero.charName == "Chogath" then
+					if Settings.settings.UseR then
+						if Smite.ready and Rready and GetDistance(minion) <= 350 then
+							local dmg3 = minion.health - totalDmg
+							if minion.health > totalDmg then
+								DrawText3D(tostring(math.ceil(dmg3)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+							else
+								DrawText3D("SMITABLE (R+ignite)",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+							end
+						elseif Rready and not Smite.ready and GetDistance(minion) <= 350 then
+							local dmg2 = minion.health - rDmg
+								if minion.health > rDmg then
+									DrawText3D(tostring(math.ceil(dmg2)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+								else
+									DrawText3D("SMITABLE (R)",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+								end
+						elseif Smite.ready and not Rready and GetDistance(minion) <= Smite.range then
+							if minion.health > smiteDmg then
+								DrawText3D(tostring(math.ceil(dmg1)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+							else
+								DrawText3D("SMITABLE",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+							end
+						elseif Smite.ready and GetDistance(minion) <= Smite.range and GetDistance(minion) > 350 then
+							if minion.health > smiteDmg then
+								DrawText3D(tostring(math.ceil(dmg1)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+							else
+								DrawText3D("SMITABLE",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+							end
+						end
+					end
+					if not Settings.settings.UseR then
+						if Smite.ready then
+							if minion.health > smiteDmg then
+								DrawText3D(tostring(math.ceil(dmg1)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+							else
+								DrawText3D("SMITABLE",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+							end
+						end
+					end
 				else
-					DrawText3D("SMITABLE",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+					if Smite.ready then
+						if minion.health > smiteDmg then
+							DrawText3D(tostring(math.ceil(dmg1)),minion.x, minion.y+450, minion.z, 24, 0xFFFF0000)
+						else
+							DrawText3D("SMITABLE",minion.x, minion.y+450, minion.z, 24, 0xff00ff00)
+						end
+					end
 				end
 			end
 		end
@@ -128,7 +180,6 @@ end
 function checkSmite()
 	for i, minion in pairs(MyMinionTable) do
 		local isMinion = MyMinionTable[i]
-		smiteDmg = math.max(20*myHero.level+370,30*myHero.level+330,40*myHero.level+240,50*myHero.level+100)
 		
 		if isMinion.visible and not isMinion.dead then
 			if Settings.settings.wolve then
@@ -173,7 +224,7 @@ function checkSmite()
 				end
 			end
 			
-			if Settings.settings.Nashor and GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
+			if Settings.settings.Nashor then
 				if isMinion.name == "SRU_Baron12.1.1" then
 					return isMinion
 				end
@@ -194,18 +245,48 @@ function KillSteall()
 end
 
 function Checks()
+
 	Smite.ready = (Smite.slot ~= nil and myHero:CanUseSpell(Smite.slot) == READY )
+	Rready = (myHero:CanUseSpell(_R) == READY)
+	
 	minion = checkSmite()
+	
 	if Settings.settings.Smite then
-		if ValidMinion(minion) ~= nil and GetDistance(minion) <= Smite.range and minion.health <= smiteDmg then
-			CastSpell(Smite.slot, minion)
+		smiteDmg = math.max(20*myHero.level+370,30*myHero.level+330,40*myHero.level+240,50*myHero.level+100)
+		if myHero.charName == "Chogath" then
+			if ValidMinion(minion) then
+			
+				if Settings.settings.UseR and Rready and Smite.ready and GetDistance(minion) <= 350 then
+					totalDmg = 1000 + (0.7*myHero.ap) + smiteDmg
+					if minion.health <= totalDmg then 
+						CastSpell(Smite.slot, minion)
+						CastSpell(_R, minion)
+					end
+				elseif Settings.settings.UseR and Rready and GetDistance(minion) <= 350 then
+					 rDmg = 1000 + (0.7*myHero.ap)
+					if minion.health <= rDmg then 
+						CastSpell(_R, minion)
+					end
+				elseif Smite.ready and GetDistance(minion) <= Smite.range then
+					if minion.health <= smiteDmg then 
+						CastSpell(Smite.slot, minion)
+					end
+				end
+			end
+		else
+			if ValidMinion(minion) ~= nil and GetDistance(minion) <= Smite.range and minion.health <= smiteDmg then
+				CastSpell(Smite.slot, minion)
+			end
 		end
 	end
+	
 end
 
 function Variable()
 	MyMinionTable = { }
-  
+	smiteDmg = 0
+	totalDmg = 0
+	
 	for i = 0, objManager.maxObjects do
 		local object = objManager:getObject(i)
 		if object and object.valid and not object.dead then
@@ -231,6 +312,9 @@ function Menu()
 	Settings = scriptConfig("AutoSmite", "AMBER & Linkpad")
 		Settings:addSubMenu("[AutoSmite] - Settings", "settings")
 			Settings.settings:addParam("Smite", "Use AutoSmite", SCRIPT_PARAM_ONKEYTOGGLE, true, GetKey("T"))
+			if myHero.charName == "Chogath" then
+				Settings.settings:addParam("UseR","Use (R) ", SCRIPT_PARAM_ONOFF, true)
+			end
 			Settings.settings:addParam("golem","Use On Golem ", SCRIPT_PARAM_ONOFF, false)
 			Settings.settings:addParam("wolve","Use On Wolve ", SCRIPT_PARAM_ONOFF, false)
 			Settings.settings:addParam("ghost","Use On Ghost ", SCRIPT_PARAM_ONOFF, false)
