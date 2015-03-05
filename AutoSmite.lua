@@ -14,7 +14,7 @@
                                                                                              
 ]]
 
-local AutoSmite_Version = 1.1
+local AutoSmite_Version = 1.2
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -75,30 +75,6 @@ SxUpdate(AutoSmite_Version,
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
 	function(NewVersion) if NewVersion > AutoSmite_Version then print("<font color=\"#F0Ff8d\"><b>AutoSmite : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true else print("<font color=\"#F0Ff8d\"><b>AutoSmite: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end 
 end)
-	
-if FileExist(LIB_PATH .. "/SxOrbWalk.lua") then
-	require("SxOrbWalk")
-else
-	SxUpdate(0,
-		"raw.githubusercontent.com",
-		"/Superx321/BoL/master/common/SxOrbWalk.Version",
-		"/Superx321/BoL/master/common/SxOrbWalk.lua",
-		LIB_PATH.."/SxOrbWalk.lua",
-		function(NewVersion) if NewVersion > 0 then print("<font color=\"#F0Ff8d\"><b>SxOrbWalk: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true end 
-	end)
-end
-	
-if FileExist(LIB_PATH .. "/VPrediction.lua") then
-	require("VPrediction")
-else
-	SxUpdate(0,
-		"raw.githubusercontent.com",
-		"/Ralphlol/BoLGit/master/VPrediction.version",
-		"/Ralphlol/BoLGit/master/VPrediction.lua",
-		LIB_PATH.."/VPrediction.lua",
-		function(NewVersion) if NewVersion > 0 then print("<font color=\"#F0Ff8d\"><b>VPrediction: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true end 
-	end)
-end
 
 
 function OnLoad()
