@@ -14,7 +14,7 @@
                                                                                              
 ]]
 
-local AutoSmite_Version = 1.2
+local AutoSmite_Version = 1.3
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -129,55 +129,58 @@ function checkSmite()
 	for i, minion in pairs(MyMinionTable) do
 		local isMinion = MyMinionTable[i]
 		smiteDmg = math.max(20*myHero.level+370,30*myHero.level+330,40*myHero.level+240,50*myHero.level+100)
-		if Settings.settings.redBuff then
-			if isMinion.name == "SRU_Red4.1.1" or isMinion.name == "SRU_Red10.1.1" then
-				if isMinion.visible and not isMinion.dead then
-					if GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
-						if Settings.settings.Smite then
-							CastSpell(Smite.slot, isMinion)
-						end
-					end
+		
+		if isMinion.visible and not isMinion.dead then
+			if Settings.settings.wolve then
+				if isMinion.name == "SRU_Murkwolf8.1.1" or isMinion.name == "SRU_Murkwolf2.1.1" then
+					return isMinion
+				end
+			end		
+
+			if Settings.settings.ghost then
+				if isMinion.name == "SRU_Razorbeak3.1.1" or isMinion.name == "SRU_Razorbeak9.1.1" then
+					return isMinion
+				end
+			end	
+			
+			if Settings.settings.gromp then
+				if isMinion.name == "SRU_Gromp14.1.1" or isMinion.name == "SRU_Gromp13.1.1" then
+					return isMinion
+				end
+			end	
+			
+			if Settings.settings.golem then
+				if isMinion.name == "SRU_Krug5.1.2" or isMinion.name == "SRU_Krug11.1.2" then
 					return isMinion
 				end
 			end
-		end
-		if Settings.settings.blueBuff then
-			if isMinion.name == "SRU_Blue1.1.1" or isMinion.name == "SRU_Blue7.1.1" then
-				if isMinion.visible and not isMinion.dead then
-					if GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
-						if Settings.settings.Smite then
-							CastSpell(Smite.slot, isMinion)
-						end
-					end
+		
+			if Settings.settings.redBuff then
+				if isMinion.name == "SRU_Red4.1.1" or isMinion.name == "SRU_Red10.1.1" then
 					return isMinion
 				end
 			end
-		end
-		if Settings.settings.Drake then
-			if isMinion.name == "SRU_Dragon6.1.1" then
-				if isMinion.visible and not isMinion.dead then
-					if GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
-						if Settings.settings.Smite then
-							CastSpell(Smite.slot, isMinion)
-						end
-					end
+			
+			if Settings.settings.blueBuff then
+				if isMinion.name == "SRU_Blue1.1.1" or isMinion.name == "SRU_Blue7.1.1" then
 					return isMinion
 				end
 			end
-		end
-		if Settings.settings.Nashor then
-			if isMinion.name == "SRU_Baron12.1.1" then
-				if isMinion.visible and not isMinion.dead then
-					if GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
-						if Settings.settings.Smite then
-							CastSpell(Smite.slot, isMinion)
-						end
-					end
+			
+			if Settings.settings.Drake then
+				if isMinion.name == "SRU_Dragon6.1.1" then
 					return isMinion
 				end
 			end
+			
+			if Settings.settings.Nashor and GetDistance(isMinion) <= Smite.range and isMinion.health <= smiteDmg then
+				if isMinion.name == "SRU_Baron12.1.1" then
+					return isMinion
+				end
+			end
+			
 		end
-   end
+	end
 end
 
 function KillSteall()
@@ -192,6 +195,12 @@ end
 
 function Checks()
 	Smite.ready = (Smite.slot ~= nil and myHero:CanUseSpell(Smite.slot) == READY )
+	minion = checkSmite()
+	if Settings.settings.Smite then
+		if ValidMinion(minion) ~= nil and GetDistance(minion) <= Smite.range and minion.health <= smiteDmg then
+			CastSpell(Smite.slot, minion)
+		end
+	end
 end
 
 function Variable()
@@ -222,6 +231,10 @@ function Menu()
 	Settings = scriptConfig("AutoSmite", "AMBER & Linkpad")
 		Settings:addSubMenu("[AutoSmite] - Settings", "settings")
 			Settings.settings:addParam("Smite", "Use AutoSmite", SCRIPT_PARAM_ONKEYTOGGLE, true, GetKey("T"))
+			Settings.settings:addParam("golem","Use On Golem ", SCRIPT_PARAM_ONOFF, false)
+			Settings.settings:addParam("wolve","Use On Wolve ", SCRIPT_PARAM_ONOFF, false)
+			Settings.settings:addParam("ghost","Use On Ghost ", SCRIPT_PARAM_ONOFF, false)
+			Settings.settings:addParam("gromp","Use On Gromp ", SCRIPT_PARAM_ONOFF, false)
 			Settings.settings:addParam("redBuff","Use On Red Buff ", SCRIPT_PARAM_ONOFF, true)
 			Settings.settings:addParam("blueBuff", "Use On Blue Buff ", SCRIPT_PARAM_ONOFF, true)
 			Settings.settings:addParam("Drake", "Use On Drake ", SCRIPT_PARAM_ONOFF, true)
