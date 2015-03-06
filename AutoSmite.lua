@@ -14,7 +14,7 @@
                                                                                              
 ]]
 
-local AutoSmite_Version = 2.0
+local AutoSmite_Version = 2.1
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -253,16 +253,16 @@ end
 function Smite:OnTick()
 	self.smiteReady = self.MyOwnMinionSmiteManager:smiteReady()
 	self.smiteDamage = math.max(20*myHero.level+370,30*myHero.level+330,40*myHero.level+240,50*myHero.level+100)
-	self:CheckSmite()
+	if _G.myMenu.settings.Smite then
+		self:CheckSmite()
+	end
 end
 
 function Smite:CheckSmite()
 	self.minion = self.MyOwnMinionSmiteManager:CheckMinion()
 	if self.minion then
-		if _G.myMenu.settings.Smite then
-			if self.minion.health <= self.smiteDamage then 
-				CastSpell(self.smiteSlot, self.minion)
-			end
+		if self.minion.health <= self.smiteDamage then 
+			CastSpell(self.smiteSlot, self.minion)
 		end
 	end
 end
@@ -384,6 +384,11 @@ function Chogath:CheckSmite()
 						CastSpell(self.smiteSlot, self.minion)
 					end
 				end
+			else
+				self.smiteDamage = self.smite
+				if self.minion.health <= self.smiteDamage and self.smiteReady then 
+					CastSpell(self.smiteSlot, self.minion)
+				end
 			end
 		elseif GetDistance(self.minion) <= 550 then
 			self.smiteDamage = self.smite
@@ -492,7 +497,7 @@ function Nunu:CheckSmite()
 		self.spell = self:qDamage()
 	
 		if GetDistance(self.minion) <= 350 then
-			if _G.myMenu.settings.useQ and _G.myMenu.settings.Smite then
+			if _G.myMenu.settings.useQ then
 				if self.qReady and self.smiteReady then
 					self.smiteDamage = self.smite + self.spell
 					if self.minion.health <= self.smiteDamage then
@@ -516,14 +521,7 @@ function Nunu:CheckSmite()
 						CastSpell(self.smiteSlot, self.minion)
 					end
 				end
-			elseif  _G.myMenu.settings.useQ then
-				if self.qReady then
-					self.smiteDamage = self.spell
-					if self.minion.health <= self.smiteDamage then 
-						CastSpell(_Q, self.minion)
-					end
-				end
-			elseif _G.myMenu.settings.Smite then
+			else
 				self.smiteDamage = self.smite
 				if self.minion.health <= self.smiteDamage and self.smiteReady then 
 					CastSpell(self.smiteSlot, self.minion)
