@@ -1,6 +1,6 @@
-if not VIP_USER or myHero.charName ~= "Blitzcrank" then return end
+if myHero.charName ~= "Blitzcrank" then return end
 
-local  BlitzcrankAssGrabber_Version = 2.0
+local  BlitzcrankAssGrabber_Version = 3.0
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -95,72 +95,92 @@ else
 		function(NewVersion) if NewVersion > 0 then print("<font color=\"#F0Ff8d\"><b>VPrediction: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") ForceReload = true end 
 	end)
 end
-------------------------------------------------------
-------------------------------------------------------
-------------------------------------------------------
---			 Callbacks				
-------------------------------------------------------
-------------------------------------------------------
------------------------------------------------------
+
 
 function OnLoad()
-	print("<b><font color=\"#FF001E\">| Blitzcrank | Ass-Grabber | </font></b><font color=\"#FF980F\"> Have a Good Game !!! </font><font color=\"#FF001E\">| AMBER |</font>")
+	DelayAction(function()	
+		CustomOnLoad()
+		AddMsgCallback(CustomOnWndMsg)
+		AddApplyBuffCallback(CustomOnApplyBuff)
+		AddDrawCallback(CustomOnDraw)		
+		AddProcessSpellCallback(CustomOnProcessSpell)
+		AddTickCallback(CustomOnTick)		
+	end, 6)
+end
+
+function CustomOnLoad()
 	if ForceReload then return end
-	TargetSelector = TargetSelector(TARGET_MOST_AD, 1250, DAMAGE_MAGICAL, false, true)
+	print("<font color=\"#F0Ff8d\"><b>Blitzcrank Ass-Grabber:</b></font> <font color=\"#FF0F0F\"> Have a Good Game | By AMBER |  </font>")
+	
+	if _G.MMA_Loaded ~= nil then
+		PrintChat("<font color=\"#F0Ff8d\"><b>MMA: </b></font> <font color=\"#FF0F0F\">Loaded</font>")
+		MMA = true
+		SAC = false
+		Sx = false
+	elseif _G.AutoCarry ~= nil then
+		PrintChat("<font color=\"#F0Ff8d\"><b>SAC: </b></font> <font color=\"#FF0F0F\">Loaded</font>")
+		SAC = true
+		MMA = false
+		Sx = false
+	else
+		PrintChat("<font color=\"#F0Ff8d\"><b>SxOrbWalk: </b></font> <font color=\"#FF0F0F\">Loaded</font>")
+		Sx = true
+		MMA = false
+		SAC = false
+	end
+	
+	TargetSelector = TargetSelector(TARGET_MOST_AD, 1350, DAMAGE_MAGICAL, false, true)
 	Variables()
 	Menu()
 end
 
-function OnTick()
+function CustomOnTick()
 	if ForceReload then return end
-	KillSteall()
-	Checks()
-	ComboKey = Settings.combo.comboKey
 	
 	TargetSelector:update()
 	Target = GetCustomTarget()
-	SxOrb:ForceTarget(Target)
-
-	 test = tostring(math.ceil(ManashieldStrength()))
 	
-	if Settings.extra.baseW then 
-		local pos = Vector(1316,1300) 
-		if GetDistance(pos) < 800 then 
-			CastW() 
-		end
+	if Sx then
+		SxOrb:ForceTarget(Target)
+	end
+	if SAC then
+		AutoCarry.Orbwalker:Orbwalk(Target)
 	end
 	
-	if Settings.extra.baseW then 
-		local pos2 = Vector(13500,13600) 
-		if GetDistance(pos2) < 800 then 
-			CastW() 
-		end
-	end
+	
+	manaShield = tostring(math.ceil(ManashieldStrength()))
+	ComboKey = Settings.combo.comboKey
+	autoComboKey = Settings.autoCombo.autoCombo
+	Checks()
+	
+	KillSteall()
 	
 	if Target ~= nil then
 		if ComboKey then
 			Combo(Target)
+		elseif autoComboKey then
+			autoCombo(Target)
 		end
 	end
 end
 
-function OnDraw()
+function CustomOnDraw()
 	if ForceReload then return end
 	if Settings.drawstats.stats then
+		UpdateWindow()
 		if Settings.drawstats.pourcentage then
-			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, 400, 920, 0xff00ff00)
+			DrawText("Percentage Grab done : " .. tostring(math.ceil(pourcentage)) .. "%" ,18, WINDOW_H * 0.02,WINDOW_W * 0.4, 0xff00ff00)
 		end
 		if Settings.drawstats.grabdone then
-			DrawText("Grab Done : "..tostring(nbgrabwin),18, 400, 940, 0xff00ff00)
+			DrawText("Grab Done : "..tostring(nbgrabwin),18, WINDOW_H * 0.02, WINDOW_W * 0.415, 0xff00ff00)
 		end
 		if Settings.drawstats.grabfail then
-			DrawText("Grab Miss : "..tostring(missedgrab),18, 400, 960, 0xFFFF0000)
+			DrawText("Grab Miss : "..tostring(missedgrab),18, WINDOW_H * 0.02, WINDOW_W * 0.430, 0xFFFF0000)
 		end
-		if Settings.drawstats.mana and test ~= nil then
-			DrawText("Passive's Shield : ".. tostring(math.ceil(test)) .. "HP" ,18, 400, 980, 0xffffff00)
+		if Settings.drawstats.mana and manaShield ~= nil then
+			DrawText("Passive's Shield : ".. tostring(math.ceil(manaShield)) .. "HP" ,18, WINDOW_H * 0.02, WINDOW_W * 0.445, 0xffffff00)
 		end
 	end
-
 	if not myHero.dead and not Settings.drawing.mDraw then	
 		if ValidTarget(Target) then 
 			if Settings.drawing.text then 
@@ -169,11 +189,16 @@ function OnDraw()
 			if Settings.drawing.targetcircle then 
 				DrawCircle(Target.x, Target.y, Target.z, 150, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
 			end
+				
 		end
-	
-	
-		if SkillQ.ready and Settings.drawing.qDraw then 
-			DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+		if SkillQ.ready then
+			if ValidTarget(Target) and Settings.drawing.line then 
+				local IsCollision = VP:CheckMinionCollision(Target, Target.pos,SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero.pos,nil, true)
+				DrawLine3D(myHero.x, myHero.y, myHero.z, Target.x, Target.y, Target.z, 5, IsCollision and ARGB(125, 255, 0,0) or ARGB(125, 0, 255,0))
+			end
+			if Settings.drawing.qDraw then 
+				DrawCircle(myHero.x, myHero.y, myHero.z, SkillQ.range, RGB(Settings.drawing.qColor[2], Settings.drawing.qColor[3], Settings.drawing.qColor[4]))
+			end
 		end
 		if SkillR.ready and Settings.drawing.rDraw then 
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, RGB(Settings.drawing.rColor[2], Settings.drawing.rColor[3], Settings.drawing.rColor[4]))
@@ -185,20 +210,11 @@ function OnDraw()
 	end
 end
 
-------------------------------------------------------
-------------------------------------------------------
-------------------------------------------------------
---			 Functions				
-------------------------------------------------------
-------------------------------------------------------
-------------------------------------------------------
-
-
 function GetCustomTarget()
+	TargetSelector:update()	
 	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 1500) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
 		return SelectedTarget
 	end
-	TargetSelector:update()	
 	if TargetSelector.target and not TargetSelector.target.dead and TargetSelector.target.type == myHero.type then
 		return TargetSelector.target
 	else
@@ -206,8 +222,7 @@ function GetCustomTarget()
 	end
 end
 
-
-function OnWndMsg(Msg, Key)	
+function CustomOnWndMsg(Msg, Key)	
 	if ForceReload then return end
 	if Msg == WM_LBUTTONDOWN then
 		local minD = 0
@@ -236,12 +251,8 @@ function ManashieldStrength()
  return ShieldStrength
 end
 
-function OnProcessSpell(unit, spell)
+function CustomOnProcessSpell(unit, spell)
 	if ForceReload then return end
-	if spell.name == "summonerteleport" and unit.isMe and Settings.extra.teleportW then 
-		CastW()
-	end
-	
 	if spell.name == "RocketGrab" and unit.isMe then
 		nbgrabtotal=nbgrabtotal+1
 		missedgrab = (nbgrabtotal-nbgrabwin)
@@ -249,19 +260,8 @@ function OnProcessSpell(unit, spell)
     end
 end
 
---[[
-function OnGainBuff(unit , buff)
+function CustomOnApplyBuff(source, unit, buff)
 	if ForceReload then return end
-	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
-		nbgrabwin = nbgrabwin + 0.2
-		missedgrab = (nbgrabtotal-nbgrabwin)
-		pourcentage =((nbgrabwin*100)/nbgrabtotal)
-	end	
-	
-end
-]]
-
-function OnApplyBuff(source, unit, buff)
 	if buff.name == "rocketgrab2" and not unit.isMe and unit.type == myHero.type then 
 		nbgrabwin = nbgrabwin + 1
 		missedgrab = (nbgrabtotal-nbgrabwin)
@@ -270,21 +270,44 @@ function OnApplyBuff(source, unit, buff)
 end
 
 function KillSteall()
+	if ForceReload then return end
 	for _, unit in pairs(GetEnemyHeroes()) do
 		local health = unit.health
 		local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
-			if health < dmgR*0.95 and Settings.killsteal.useR and ValidTarget(unit) then
-				CastR(unit)
-			end
+		local dmgQ = getDmg("Q", unit, myHero) + (myHero.ap)
+		if health < dmgQ*0.95 and Settings.killsteal.useQ and ValidTarget(unit) then
+			CastQ(unit)
+		elseif health < dmgR*0.95 and Settings.killsteal.useR and ValidTarget(unit) then
+			CastR(unit)
+		end
 	 end
+end
+
+function autoCombo(unit)
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+		if Settings.autoCombo.autoGrab then
+			CastQ(unit)
+		end
+		if Settings.autoCombo.autoBump then
+			CastE(unit)
+		end
+		if Settings.autoCombo.autoUlt then
+			CastR(unit)
+		end
+	end
 end
 
 function Combo(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
-	
-		CastQ(unit)
-		
-		CastE(unit)
+		if Settings.combo.useQ then
+			CastQ(unit)
+		end
+		if Settings.combo.useW then
+			CastW(unit)
+		end
+		if Settings.combo.useE then
+			CastE(unit)
+		end
 		
 		if Settings.combo.useR then 
 			if not Settings.combo.useRafterE then
@@ -292,50 +315,46 @@ function Combo(unit)
 			end
 		end
 		if Settings.combo.RifKilable then
-				local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
-				if unit.health < dmgR*0.95 then
-					CastR(unit)
-				end
+			local dmgR = getDmg("R", unit, myHero) + (myHero.ap)
+			if unit.health < dmgR*0.95 then
+				CastR(unit)
+			end
+		end
+	end
+end
+
+function CastQ(unit)
+	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready then
+		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
+		if HitChance >= 2 then
+			CastSpell(_Q, CastPosition.x, CastPosition.z)
+		end
+	end
+end	
+
+function CastW(unit)
+local IsCollision = VP:CheckMinionCollision(unit, unit.pos,SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero.pos,nil, true)
+	if not IsCollision then
+		if GetDistance(unit) <= SkillQ.range + 250 and GetDistance(unit) >= SkillQ.range and SkillW.ready and SkillQ.ready then
+			CastSpell(_W)
+		elseif GetDistance(unit) <= SkillE.range + 150 and SkillW.ready then
+			CastSpell(_W)
 		end
 	end
 end
 	
 function CastE(unit)
 	if GetDistance(unit) <= SkillE.range and SkillE.ready then
-			Packet("S_CAST", {spellId = _E}):send()
-			myHero:Attack(unit)
+		CastSpell(_E)
+		myHero:Attack(unit)
 	end	
-end
-
-function CastQ(unit)
-	if unit ~= nil and GetDistance(unit) <= SkillQ.range and SkillQ.ready then
-		CastPosition,  HitChance,  Position = VP:GetLineCastPosition(unit, SkillQ.delay, SkillQ.width, SkillQ.range, SkillQ.speed, myHero, true)	
-		
-		if HitChance >= 2 then
-			Packet("S_CAST", {spellId = _Q, fromX = CastPosition.x, fromY = CastPosition.z, toX = CastPosition.x, toY = CastPosition.z}):send()
-		end
-	end
-end
-
-function CastW()
-	if SkillW.ready then
-		Packet("S_CAST", {spellId = _W}):send()
-	end
 end
 
 function CastR(unit)
 	if GetDistance(unit) <= SkillR.range and SkillR.ready then
-		Packet("S_CAST", {spellId = _R}):send()
+		CastSpell(_R)
 	end	
 end
-
-------------------------------------------------------
-------------------------------------------------------
-------------------------------------------------------
---			MENU & CHECKS
-------------------------------------------------------
-------------------------------------------------------
-------------------------------------------------------
 
 function Checks()
 	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
@@ -350,19 +369,34 @@ end
 function Menu()
 	Settings = scriptConfig("| | Blitzcrank | Ass-Grabber | |", "AMBER")
 	
-	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "combo")
+	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings (SBTW)", "combo")
 		Settings.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Settings.combo:addParam("useQ", "Use (Q) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.combo:addParam("useE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, false)
-		Settings.combo:addParam("RifKilable", "Use (R) if unit is kilable", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("useR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.combo:addParam("RifKilable", "Only (R) for KillSteal", SCRIPT_PARAM_ONOFF, false)
+		Settings.combo:permaShow("comboKey")
+		Settings.combo:permaShow("useR")
+		Settings.combo:permaShow("RifKilable")
+		
+	Settings:addSubMenu("["..myHero.charName.."] - AutoCombo Settings", "autoCombo")
+		Settings.autoCombo:addParam("autoCombo", "Auto Combo State", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
+		Settings.autoCombo:addParam("autoGrab", "Use (Q) in AutoCombo", SCRIPT_PARAM_ONOFF, true)
+		Settings.autoCombo:addParam("autoBump", "Use (E) in AutoCombo", SCRIPT_PARAM_ONOFF, true)
+		Settings.autoCombo:addParam("autoUlt", "Use (R) in AutoCombo", SCRIPT_PARAM_ONOFF, true)
+		Settings.autoCombo:permaShow("autoCombo")
 		
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal", "killsteal")	
-	Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
+		Settings.killsteal:addParam("useQ", "Steal With (Q)", SCRIPT_PARAM_ONOFF, true)
+		Settings.killsteal:addParam("useR", "Steal With (R)", SCRIPT_PARAM_ONOFF, true)
+		Settings.killsteal:permaShow("useQ")
+		Settings.killsteal:permaShow("useR")
 	
-	Settings:addSubMenu("["..myHero.charName.."] - Extra Option", "extra")
-	Settings.extra:addParam("teleportW", "Auto use (W) after a teleport", SCRIPT_PARAM_ONOFF, true)
-	Settings.extra:addParam("baseW", "Auto use (W) when leave base", SCRIPT_PARAM_ONOFF, true)
-	
+	Settings:addSubMenu("["..myHero.charName.."] - Misc", "misc")
+		Settings.misc:addParam("autoE", "Use (E) after a Successful Grab (Broken)", SCRIPT_PARAM_ONOFF, true)
+		Settings.misc:permaShow("autoE")
+
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "drawing")	
 		Settings.drawing:addParam("mDraw", "Disable All Range Draws", SCRIPT_PARAM_ONOFF, false)
 		Settings.drawing:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
@@ -373,27 +407,25 @@ function Menu()
 		Settings.drawing:addParam("rColor", "Draw "..SkillR.name.." (R) Color", SCRIPT_PARAM_COLOR, {0, 100, 44, 255})
 		Settings.drawing:addParam("text", "Draw Current Target", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawing:addParam("targetcircle", "Draw Circle On Target", SCRIPT_PARAM_ONOFF, true)
+		Settings.drawing:addParam("line", "Draw (Q) Line Helper", SCRIPT_PARAM_ONOFF, true)
 		
 		
-	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats", "drawstats")
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Stats (Broken)", "drawstats")
 		Settings.drawstats:addParam("stats", "Show Stats & Passive's shield", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("pourcentage", "Show Pourcentage", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabdone", "Show Grab Done", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("grabfail", "Show Grab Fail", SCRIPT_PARAM_ONOFF, true)
 		Settings.drawstats:addParam("mana", "Show Passive's shield", SCRIPT_PARAM_ONOFF, true)
-		
-	Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
-		SxOrb:LoadToMenu(Settings.Orbwalking)
 	
-		Settings.combo:permaShow("comboKey")
-		Settings.combo:permaShow("useR")
-		Settings.combo:permaShow("RifKilable")
-		Settings.killsteal:permaShow("useR")
-		Settings.extra:permaShow("teleportW")
-		Settings.extra:permaShow("baseW")
+
 	
 	TargetSelector.name = "Blitzcrank"
-	Settings:addTS(TargetSelector)
+		Settings:addTS(TargetSelector)
+
+	if Sx then
+		Settings:addSubMenu("["..myHero.charName.."] - Orbwalking Settings", "Orbwalking")
+		SxOrb:LoadToMenu(Settings.Orbwalking)
+	end
 	
 end
 
@@ -413,7 +445,6 @@ function Variables()
 	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 	_G.DrawCircle = DrawCircle2
 end
-
 
 function DrawCircle2(x, y, z, radius, color)
   local vPos1 = Vector(x, y, z)
