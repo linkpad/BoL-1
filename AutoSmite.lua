@@ -14,7 +14,7 @@
                                                                                              
 ]]
 
-local AutoSmite_Version = 2.3
+local AutoSmite_Version = 2.4
 
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -111,14 +111,9 @@ function MinionSmiteManager:__init()
 		end
 	end
 	
-	AddTickCallback(function() self:OnTick() end)
 	AddCreateObjCallback(function(minion) self:OnCreateObj(minion) end)
 	AddDeleteObjCallback(function(minion) self:OnDeleteObj(minion) end)
 	
-end
-
-function MinionSmiteManager:OnTick()
-	self.smite = math.max(20*myHero.level+370,30*myHero.level+330,40*myHero.level+240,50*myHero.level+100)
 end
 
 function MinionSmiteManager:ValidMinion(m)
